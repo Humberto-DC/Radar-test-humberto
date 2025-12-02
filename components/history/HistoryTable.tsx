@@ -51,7 +51,7 @@ export default function HistoryTable({ rows }: Props) {
   }
 
   return (
-    <div className="max-h-[65vh] overflow-x-auto overflow-y-hidden pb-2">
+    <div className=" overflow-x-auto overflow-y-hidden pb-2">
       <div className="flex gap-4 min-w-max">
         {days.map(([dateKey, items]) => {
           const d = parseISO(dateKey);

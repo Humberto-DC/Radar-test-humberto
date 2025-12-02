@@ -1,15 +1,32 @@
 "use client";
 import { Client, Message, Contacts } from "./types";
 import { keyOf } from "./utils";
-import { useRef, useState } from "react";
+import { useRef } from "react";
+
+type SendResult = {
+  clientId: number;
+  contactId: number;
+  telefone: string | null;
+  ok: boolean;
+  status?: number;
+  data?: unknown;
+  error?: string;
+};
+
+type SendSummary = {
+  total: number;
+  successCount: number;
+  failCount: number;
+  details: SendResult[];
+};
 
 type Props = {
   sending: boolean;
   selectedMap: Record<string, boolean>;
   clients: Client[];
-  contacts: Contacts[];              // 👈 NOVO
+  contacts: Contacts[];
   selectedMessage?: Message;
-  onResult: (summary: any) => void;
+  onResult: (summary: SendSummary) => void;
   onResetSelection: () => void;
   onStart?: () => void;
 };
@@ -25,13 +42,11 @@ export default function SendActions({
   onStart,
 }: Props) {
   const inFlight = useRef(false);
-  const [localSending, setLocalSending] = useState(false);
 
   const handleSendBatch = async () => {
     if (inFlight.current) return; // impedir cliques repetidos
     inFlight.current = true;
     onStart?.();
-    setLocalSending(true);
 
     const selectedIds = Object.keys(selectedMap);
     console.log("[handleSendBatch] selectedIds:", selectedIds);
@@ -39,33 +54,30 @@ export default function SendActions({
     if (!selectedMessage) {
       alert("Selecione uma mensagem primeiro.");
       inFlight.current = false;
-      setLocalSending(false);
       return;
     }
 
     if (selectedIds.length === 0) {
       alert("Selecione pelo menos um cliente.");
       inFlight.current = false;
-      setLocalSending(false);
       return;
     }
 
-    const messageText = selectedMessage?.texto ?? "";
-    const imageUrl = selectedMessage?.imagem || undefined;
+    const messageText = selectedMessage.texto ?? "";
+    const imageUrl = selectedMessage.imagem || undefined;
+
     if (!messageText && !imageUrl) {
       alert("Mensagem selecionada está vazia.");
       inFlight.current = false;
-      setLocalSending(false);
       return;
     }
 
     // 🔗 Monta pares { client, contact } usando contatos_cliente
-    const recipients = selectedIds
+    const recipients: { client: Client; contact: Contacts }[] = selectedIds
       .map((id) => {
         const client = clients.find((c) => keyOf(c.id_cliente) === id);
         if (!client) return null;
 
-        // pega o primeiro contato COM telefone desse cliente
         const contact = contacts.find(
           (ct) =>
             ct.id_cliente === client.id_cliente &&
@@ -82,7 +94,9 @@ export default function SendActions({
 
         return { client, contact };
       })
-      .filter(Boolean) as { client: Client; contact: Contacts }[];
+      .filter(
+        (pair): pair is { client: Client; contact: Contacts } => pair !== null
+      );
 
     console.log(
       "[handleSendBatch] recipients (client + contact):",
@@ -94,17 +108,17 @@ export default function SendActions({
       }))
     );
 
-    const details: any[] = [];
+    const details: SendResult[] = [];
     const toSend = recipients; // se quiser testar só 1: recipients.slice(0, 1)
 
     for (const { client, contact } of toSend) {
       try {
         const payload = {
-          to: contact.telefone,                 // 👈 TELEFONE DO CONTATO
+          to: contact.telefone,
           message: messageText,
           imageUrl,
           clientId: client.id_cliente,
-          contactId: contact.id_contato,       // se existir no tipo
+          contactId: contact.id_contato,
           messageId: selectedMessage.id_mensagem,
         };
 
@@ -116,10 +130,11 @@ export default function SendActions({
           body: JSON.stringify(payload),
         });
 
-        const data = await res.json().catch(() => ({}));
+        const data = (await res.json().catch(() => ({}))) as unknown;
+
         details.push({
-          clientId: client.id_cliente,
-          contactId: contact.id_contato,
+          clientId: Number(client.id_cliente),
+          contactId: Number(contact.id_contato),
           telefone: contact.telefone,
           ok: res.ok,
           status: res.status,
@@ -127,39 +142,56 @@ export default function SendActions({
         });
 
         await new Promise((r) => setTimeout(r, 120));
-      } catch (e: any) {
+      } catch (e: unknown) {
         details.push({
-          clientId: client.id_cliente,
-          contactId: contact.id_contato,
+          clientId: Number(client.id_cliente),
+          contactId: Number(contact.id_contato),
           telefone: contact.telefone,
           ok: false,
-          error: String(e),
+          error:
+            e instanceof Error ? e.message : `Erro desconhecido: ${String(e)}`,
         });
       }
     }
 
-    setLocalSending(false);
     inFlight.current = false;
 
     const successCount = details.filter((d) => d.ok).length;
     const failCount = details.length - successCount;
-    onResult({ total: details.length, successCount, failCount, details });
+
+    const summary: SendSummary = {
+      total: details.length,
+      successCount,
+      failCount,
+      details,
+    };
+
+    onResult(summary);
     onResetSelection();
   };
 
   const disabled =
-    sending ||
-    !selectedMessage ||
-    Object.keys(selectedMap).length === 0;
+    sending || !selectedMessage || Object.keys(selectedMap).length === 0;
 
   return (
     <div className="flex items-center gap-4">
       <button
         onClick={handleSendBatch}
         disabled={disabled}
-        className="bg-blue-600 disabled:opacity-50 text-white px-5 py-2 rounded"
+        className="
+          bg-[#b6f01f]
+          text-[#1a1a1a]
+          px-5 py-2
+          rounded
+          disabled:opacity-50
+          transition-all duration-150
+          hover:scale-105
+          active:scale-95
+          disabled:hover:scale-100
+          disabled:active:scale-100
+        "
       >
-        {sending ? "Sending..." : "Enviar mensagem"}
+        {sending ? "Enviando..." : "Enviar mensagem"}
       </button>
       <div className="text-sm text-gray-700">
         Selecionados: <strong>{Object.keys(selectedMap).length}</strong>

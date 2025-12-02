@@ -217,7 +217,17 @@ export default function MessageForm({ onSubmit, submitting }: Props) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-md bg-blue-800 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 lg:w-2/3"
+            className="
+            rounded-md
+            bg-[#b6f01f]
+            text-[#1a1a1a]  
+            px-6 py-3 text-sm font-semibold
+            disabled:opacity-50
+            transition-all duration-150
+            hover:scale-105
+            active:scale-95
+            disabled:hover:scale-100
+            disabled:active:scale-100"
           >
             {submitting ? "Enviando..." : "Enviar para aprovação"}
           </button>

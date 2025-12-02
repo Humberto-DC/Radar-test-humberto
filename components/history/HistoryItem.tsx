@@ -40,9 +40,6 @@ export default function HistoryItem({ row }: Props) {
     <li className="rounded-lg border border-slate-200 p-3 hover:bg-slate-50">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="truncate text-[13px] font-medium text-slate-800">
-            {row.clientes?.nome || "—"}
-          </div>
           <div className="mt-0.5 text-[12px] text-slate-500">
             {row.to_phone}
           </div>

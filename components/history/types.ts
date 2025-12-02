@@ -1,6 +1,6 @@
 // components/history/types.ts
 export type HistoryRow = {
-  id: string; // id do registro
+  id_envio: string; // id do registro
   id_cliente: number;
   to_phone: string;
   status_entrega: string; // sent | delivered | read | failed | ...

@@ -120,8 +120,8 @@ export default function Sidebar() {
                     ${isDesktopOpen ? "justify-start gap-3" : "justify-center"}
                     ${
                       active
-                        ? "bg-blue-100/40 font-semibold text-white"
-                        : "hover:bg-blue-100/20"
+                        ? "bg-[#b6f01f]  text-[#1a1a1a] opacity-85"
+                        : "hover:bg-[#b6f01f99]"
                     }
                   `}
                 >

@@ -11,7 +11,7 @@ export const keyOf = (v: string | number) => String(v);
 export function cleanName(raw: string): string {
   if (!raw) return "";
 
-  let s = raw.replace(/^\d+\s*[-:]?\s*/g, "");
+  const s = raw.replace(/^\d+\s*[-:]?\s*/g, "");
   
   const full_name = s.split(" ");
   return full_name.slice(0,2).join(" ")

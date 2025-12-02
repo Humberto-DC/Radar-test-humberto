@@ -33,6 +33,8 @@ export default function ClientsTable({
     }
   }, [someSelected]);
 
+  const moneyFormatter = new Intl.NumberFormat("pt-BR");
+
   return (
     <div className="bg-white rounded-2xl p-4 shadow">
       <div className="flex items-center justify-between mb-3">
@@ -58,7 +60,7 @@ export default function ClientsTable({
               <th className="p-2 w-10" aria-label="Selecionar cliente" />
               <th className="p-2 text-left">Nome</th>
               <th className="p-2 text-left">Limite de Crédito</th>
-              <th className="p-2 text-left">Última compra</th>
+              {/* <th className="p-2 text-left">Última compra</th> */}
               <th className="p-2 text-left">Última interação</th>
               <th className="p-2 text-left">Vendedor</th>
             </tr>
@@ -93,8 +95,8 @@ export default function ClientsTable({
                     />
                   </td>
                   <td className="p-2">{c.Cliente}</td>
-                  <td className="p-2">{c.Limite.toLocaleString()}</td>
-                  <td className="p-2">{textoCompra}</td>
+                  <td className="p-2">{moneyFormatter.format(c.Limite)}</td>
+                  {/* <td className="p-2">{textoCompra}</td> */}
                   <td className="p-2">{textoInteracao}</td>
                   <td className="p-2">{cleanName(c.Vendedor)}</td>
                 </tr>

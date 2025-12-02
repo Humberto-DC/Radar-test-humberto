@@ -1,4 +1,6 @@
 // app/history/page.tsx
+export const dynamic = "force-dynamic"; 
+
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import HistoryClient from "@/components/history/HistoryClient";
 
