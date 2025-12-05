@@ -35,7 +35,7 @@ export default function MessagesClient({ messages }: Props) {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#cacdd4]">
+    <main className="min-h-[calc(100vh-4rem)] w-full bg-[#cacdd4]">
       <div className="flex-1 mx-auto w-full max-w-screen-2xl px-6 xl:px-12 py-10">
         {/* Flash message */}
         {flash && (

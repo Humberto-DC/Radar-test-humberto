@@ -10,6 +10,7 @@ import ResultSummary from "./ResultSummary";
 
 import { Client, Message, SelectedMap, Contacts } from "./types";
 import { daysSince, keyOf } from "./utils";
+import Header from "../Header";
 
 type Props = {
   Clients: Client[];
@@ -109,7 +110,8 @@ const filteredClients = useMemo(() => {
   };
 
   return (
-    <div className="flex-1 min-h-screen bg-[#e6e8ef] to-90% py-8">
+                            // h-min - altura Header
+    <div className="flex-1 min-h-[calc(100vh-4rem)] bg-[#e6e8ef] py-8"> 
       <div className="flex-1 mx-auto w-full max-w-screen-2xl px-6 xl:px-12">
 
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-10 lg:gap-16">

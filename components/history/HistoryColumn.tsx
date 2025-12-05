@@ -20,7 +20,7 @@ export default function HistoryColumn({ title, items }: Props) {
       {items.length === 0 ? (
         <p className="text-sm text-slate-400 italic">Sem envios.</p>
       ) : (
-        <div className="flex-1 overflow-y-auto pr-1">
+        <div className="flex-1 overflow-y-auto pr-1 light-scrollbar">
           <ul className="space-y-3">
             {items.map((r) => (
               <HistoryItem key={r.id_envio} row={r} />

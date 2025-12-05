@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
+import { Listbox } from "@headlessui/react";
 type Props = {
   onSubmit: (form: FormData) => Promise<boolean>;
   submitting?: boolean;
@@ -74,7 +74,13 @@ export default function MessageForm({ onSubmit, submitting }: Props) {
     }
   };
 
+  const categoryOptions = [
+    { value: "PROMOÇÃO", label: "Promoção" },
+    { value: "AVISO", label: "Aviso" },
+    { value: "NOVIDADE", label: "Novidade" },
+  ];
   const hasError = (msg: string) => errors.includes(msg);
+  const selected = categoryOptions.find((o) => o.value === category)!;
 
   return (
     <article className="h-full rounded-2xl bg-white shadow-md flex flex-col">
@@ -104,22 +110,47 @@ export default function MessageForm({ onSubmit, submitting }: Props) {
             >
               Categoria
             </label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              aria-invalid={hasError("Selecione a categoria.") || undefined}
-              aria-describedby="err-category"
-              className={`w-full rounded-md border p-2.5 text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                hasError("Selecione a categoria.")
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
-            >
-              <option value="PROMOÇÃO">Promoção</option>
-              <option value="AVISO">Aviso</option>
-              <option value="NOVIDADE">Novidade</option>
-            </select>
+
+            <Listbox value={category} onChange={setCategory}>
+              <div className="relative">
+                <Listbox.Button
+                  id="category"
+                  className={`
+                    w-full rounded-md p-2 text-left text-gray-600 focus:ring-2 focus:ring-[#b6f01f]
+                    border
+                    ${
+                      hasError("Selecione a categoria.")
+                        ? "border-red-500"
+                        : category
+                        ? "border-[#b6f01f]"
+                        : "border-gray-300"
+                    }
+                  `}
+                >
+                  {categoryOptions.find((o) => o.value === category)?.label ||
+                    "Selecione uma categoria"}
+                </Listbox.Button>
+
+                <Listbox.Options className="absolute w-full mt-1 bg-white border rounded-md shadow-md z-10">
+                  {categoryOptions.map((opt) => (
+                    <Listbox.Option
+                      key={opt.value}
+                      value={opt.value}   // <-- APENAS STRING!
+                      className={({ active }) =>
+                        `cursor-pointer p-2 text-sm ${
+                          active
+                            ? "bg-[#b6f01f] text-slate-900"
+                            : "text-slate-700"
+                        }`
+                      }
+                    >
+                      {opt.label}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </div>
+            </Listbox>
+
             {hasError("Selecione a categoria.") && (
               <p id="err-category" className="text-xs text-red-600">
                 Selecione a categoria.
@@ -140,7 +171,7 @@ export default function MessageForm({ onSubmit, submitting }: Props) {
               type="file"
               accept="image/*"
               onChange={(e) => onPickImage(e.target.files?.[0] || null)}
-              className="w-full cursor-pointer rounded-md border border-gray-300 p-2.5 text-sm text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full cursor-pointer rounded-md border border-gray-300 p-2.5 text-sm text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#b6f01f]"
             />
           </div>
         </div>
@@ -173,7 +204,7 @@ export default function MessageForm({ onSubmit, submitting }: Props) {
             aria-invalid={hasError("Informe o título.") || undefined}
             aria-describedby="err-title"
             placeholder="Insira o título da mensagem"
-            className={`w-full rounded-md border p-2.5 text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+            className={`w-full rounded-md border p-2.5 text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#b6f01f] ${
               hasError("Informe o título.")
                 ? "border-red-500"
                 : "border-gray-300"
@@ -199,7 +230,7 @@ export default function MessageForm({ onSubmit, submitting }: Props) {
             aria-describedby="err-body"
             placeholder="Insira o corpo da mensagem"
             rows={7}
-            className={`w-full rounded-md border p-2.5 text-sm text-gray-500  resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+            className={`w-full rounded-md border p-2.5 text-sm text-gray-500  resize-none focus:outline-none focus:ring-2 focus:ring-[#b6f01f] ${
               hasError("Informe o texto.")
                 ? "border-red-500"
                 : "border-gray-300"
