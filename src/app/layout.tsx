@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import BestPracticesModal from "../components/GoodPracticies"; // Importe o componente
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,10 +33,11 @@ export default function RootLayout({
             <Sidebar />
           </div>
 
-          <div className="flex-1">
-            {children}
-          </div>
+          <div className="flex-1">{children}</div>
         </div>
+
+        {/* Adicione o componente BestPracticesModal */}
+        <BestPracticesModal />
       </body>
     </html>
   );
