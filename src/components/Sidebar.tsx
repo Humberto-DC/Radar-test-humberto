@@ -28,12 +28,6 @@ export default function Sidebar() {
     { href: "/clients", label: "Clientes", icon: User2 },
   ];
 
-  const feedbackTypeLabel: Record<FeedbackType, string> = {
-    bug: "bug",
-    feature: "nova funcionalidade",
-    other: "outro",
-  };
-
   async function handleFeedbackSubmit(e: FormEvent) {
     e.preventDefault();
     setSending(true);

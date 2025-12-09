@@ -18,18 +18,3 @@ export function cleanName(raw: string): string {
 }
 
 const onlyDigits = (s?: string | null) => (s || "").replace(/\D/g, "");
-
-// normaliza para formato local: DDD + número (sem DDI, sem símbolo)
-const normalizePhone = (input?: string | null) => {
-  const digits = onlyDigits(input);
-
-  if (!digits) return "";
-
-  // se vier com DDI + DDD + número (ex: 5561996246646), remove o 55
-  if (digits.length > 11 && digits.startsWith("55")) {
-    return digits.slice(2); // tira o 55
-  }
-
-  // se já estiver local (61 996246646 → 61996246646), mantém
-  return digits;
-};
