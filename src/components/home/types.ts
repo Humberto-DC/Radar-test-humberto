@@ -8,6 +8,7 @@ export interface Client {
   Vendedor: string; //
   id_vendedor:  string | number; //
   Cidade: string; //
+  ativo: boolean;
 }
 
 export interface Message {

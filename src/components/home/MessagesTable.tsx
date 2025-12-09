@@ -23,7 +23,7 @@ export default function MessagesCardsList({
   }, [selectedMessageID]);
 
   const filtered = messages
-  // .filter((m) => (m.status ?? "").toLowerCase() === "approved")
+  .filter((m) => (m.status ?? "").toLowerCase() === "approved")
   .filter((m) =>
     m.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.categoria.toLowerCase().includes(searchQuery.toLowerCase()) ||

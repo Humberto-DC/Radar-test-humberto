@@ -1,7 +1,7 @@
 // components/Sidebar.tsx
 "use client";
 import Link from "next/link";
-import { MessageSquare, Zap, Menu, History, X, MessageCircle } from "lucide-react";
+import { MessageSquare, Zap, Menu, History, X, MessageCircle, User2, } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, FormEvent } from "react";
 
@@ -25,6 +25,7 @@ export default function Sidebar() {
     { href: "/", label: "Triggers", icon: Zap },
     { href: "/messages", label: "Mensagens", icon: MessageSquare },
     { href: "/history", label: "Histórico", icon: History },
+    { href: "/clients", label: "Clientes", icon: User2 },
   ];
 
   const feedbackTypeLabel: Record<FeedbackType, string> = {
