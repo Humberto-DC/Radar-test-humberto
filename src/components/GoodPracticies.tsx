@@ -36,10 +36,10 @@ const BestPracticesModal = () => {
                 <strong>1. Consentimento:</strong> Antes de enviar promoções ou mensagens em geral, certifique-se de enviar a mensagem de consentimento para todos os seus clientes.
               </li>
               <li>
-                <strong>2. Clientes que não consentirem:</strong> Caso algum cliente não consinta, acesse a página 'Clientes' e marque-o como inativo. Você poderá reverter essa alteração posteriormente, se necessário.
+                <strong>2. Clientes que não consentirem:</strong> Caso algum cliente não consinta, acesse a página *Clientes* e marque-o como inativo. Você poderá reverter essa alteração posteriormente, se necessário.
               </li>
               <li>
-                <strong>3. Evitar envios duplicados:</strong> Em caso de dúvida, verifique a página de 'Envios' para garantir que você não está enviando mensagens duplicadas, evitando assim insatisfação dos clientes.
+                <strong>3. Evitar envios duplicados:</strong> Em caso de dúvida, verifique a página de *Envios* para garantir que você não está enviando mensagens duplicadas, evitando assim insatisfação dos clientes.
               </li>
               <li>
                 <strong>4. Envio de Feedback:</strong> Se você encontrar algum erro ou tiver sugestões para melhorar a aplicação, não deixe de enviar um feedback! Na parte inferior da barra lateral temos uma seção exclusiva para isso.
