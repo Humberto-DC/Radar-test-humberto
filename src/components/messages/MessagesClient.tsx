@@ -36,9 +36,9 @@ export default function MessagesClient({ messages }: Props) {
 
   return (
     <main className="min-h-[calc(100vh-4rem)] w-full bg-[#cacdd4]">
-      <div className="flex-1 mx-auto w-full max-w-screen-2xl px-6 xl:px-12 py-10">
+      <div className="flex flex-row items-start gap-4 mx-auto w-full max-w-screen-2xl px-6 xl:px-12 py-5">
         {/* Flash message */}
-        {flash && (
+        {/* {flash && (
           <div
             role="status"
             className={`mb-4 rounded-lg px-4 py-3 text-sm ${
@@ -46,24 +46,24 @@ export default function MessagesClient({ messages }: Props) {
             }`}
           >
             {flash.msg}
-          </div>
-        )}
+          </div> */}
+        {/* )} */}
 
         {/* Layout responsivo: stack no mobile, colunas no desktop */}
-        <div className="grid grid-cols-1 gap-20 lg:grid-cols-2">
+        {/* <div className="grid grid-cols-1 gap-20 lg:grid-cols-2"> */}
           {/* Coluna esquerda: Form */}
-          <section aria-labelledby="new-message-form">
+          {/* <section aria-labelledby="new-message-form">
             <h2 id="new-message-form" className="sr-only">
               Nova mensagem
             </h2>
             <MessageForm onSubmit={handleSubmit} submitting={submitting} />
-          </section>
+          </section> */}
 
           {/* Coluna direita: Listas */}
-          <section aria-labelledby="messages-lists" className="space-y-8">
+          {/* <section aria-labelledby="messages-lists" className="space-y-8">
             <h2 id="messages-lists" className="sr-only">
               Listas de mensagens
-            </h2>
+            </h2> */}
 
             <MessagesTable
               title="Mensagens Pendentes"
@@ -76,8 +76,8 @@ export default function MessagesClient({ messages }: Props) {
               messages={messages}
               status="rejected"
             />
-          </section>
-        </div>
+          {/* </section> */}
+        {/* </div> */}
       </div>
     </main>
   );

@@ -1,7 +1,8 @@
 "use client";
+import Confirm from "@/components/Confirm";
 import { Client, Message, Contacts } from "./types";
 import { keyOf } from "./utils";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type SendResult = {
   clientId: number;
@@ -41,6 +42,7 @@ export default function SendActions({
   onResetSelection,
   onStart,
 }: Props) {
+  const [isSendingOpen, setIsSendingOpen] = useState(false);
   const inFlight = useRef(false);
 
   const handleSendBatch = async () => {
@@ -176,7 +178,10 @@ export default function SendActions({
   return (
     <div className="flex items-center gap-4">
       <button
-        onClick={handleSendBatch}
+        onClick={() => {
+          {handleSendBatch}
+          setIsSendingOpen(true);
+        }}
         disabled={disabled}
         className="
           bg-[#b6f01f]
@@ -196,6 +201,19 @@ export default function SendActions({
       <div className="text-sm text-gray-700">
         Selecionados: <strong>{Object.keys(selectedMap).length}</strong>
       </div>
+
+      {isSendingOpen && (
+        <Confirm
+          message="Confirmar envio?"
+          onConfirm={() => {
+            setIsSendingOpen(false);
+            handleSendBatch();
+          }}
+          onCancel={() => setIsSendingOpen(false)}
+        />
+      )}
     </div>
+
+
   );
 }
