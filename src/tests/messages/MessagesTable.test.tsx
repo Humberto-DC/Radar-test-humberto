@@ -11,14 +11,24 @@ const base: Message[] = [
 
 describe("MessagesTable", () => {
   it("filtra por status = pending", () => {
-    render(<MessagesTable messages={base} status="pending" />);
+    render(<MessagesTable messages={base} status="pending" title="Pendentes" />);
+
     expect(screen.getByText("A")).toBeInTheDocument();
     expect(screen.getByText("C")).toBeInTheDocument();
-    expect(screen.queryByText("B")).not.toBeInTheDocument();
+    expect(screen.queryByText("B")).not.toBeInTheDocument(); // rejected não entra
   });
 
   it("mostra estado vazio quando não há resultados", () => {
-    render(<MessagesTable messages={base} status="approved" />);
+    render(<MessagesTable messages={base} status="approved" title="Aprovadas" />);
+
     expect(screen.getByText(/Nenhuma mensagem encontrada/i)).toBeInTheDocument();
+  });
+
+  it("mostra todas as mensagens quando 'status' não é fornecido", () => {
+    render(<MessagesTable messages={base} title="Todas" />);
+
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(screen.getByText("C")).toBeInTheDocument();
   });
 });
