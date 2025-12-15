@@ -9,7 +9,7 @@ import SendActions from "./SendActions";
 import ResultSummary from "./ResultSummary";
 
 import { Client, Message, SelectedMap, Contacts } from "./types";
-import { daysSince, keyOf } from "./utils";
+import { daysSince, keyOf, normalizePhone} from "./utils";
 
 type Props = {
   Clients: Client[];
@@ -31,7 +31,7 @@ export default function HomeClient({ Clients: clients, Messages, Contacts }: Pro
 
   const selectedMessage = Messages.find((m) => m.id_mensagem === messageID);
 
-const filteredClients = useMemo(() => {
+  const filteredClients = useMemo(() => {
   const minCreditNum = parseFloat(minCredit || "0");
   const minDaysNum = parseInt(minDays || "0", 10);
   const lastIntNum = parseInt(lastInteraction || "0", 10);
@@ -61,21 +61,50 @@ const filteredClients = useMemo(() => {
   // 🔽 Ordena:
   // 1º — clientes com última interação mais recente (menor número de dias)
   // 2º — clientes que nunca interagiram vão para o fim
-  return validClients.sort((a, b) => {
-    const aDate = a.ultima_interacao ? new Date(a.ultima_interacao).getTime() : 0;
-    const bDate = b.ultima_interacao ? new Date(b.ultima_interacao).getTime() : 0;
+    return validClients.sort((a, b) => {
+      const aDate = a.ultima_interacao ? new Date(a.ultima_interacao).getTime() : 0;
+      const bDate = b.ultima_interacao ? new Date(b.ultima_interacao).getTime() : 0;
 
-    if (aDate === 0 && bDate === 0) return 0;  // ambos nunca interagiram
-    if (aDate === 0) return 1; // a nunca interagiu → vai pra baixo
-    if (bDate === 0) return -1; // b nunca interagiu → vai pra baixo
-    return bDate - aDate; // mais recente primeiro
-  });
-}, [clients, minCredit, minDays, lastInteraction, seller]);
+      if (aDate === 0 && bDate === 0) return 0;  // ambos nunca interagiram
+      if (aDate === 0) return 1; // a nunca interagiu → vai pra baixo
+      if (bDate === 0) return -1; // b nunca interagiu → vai pra baixo
+      return bDate - aDate; // mais recente primeiro
+    });
+  }, [clients, minCredit, minDays, lastInteraction, seller]);
 
 
   const allFilteredSelected =
     filteredClients.length > 0 &&
     filteredClients.every((c) => selected[keyOf(c.id_cliente)]);
+
+  const phoneByClientId = useMemo(() => {
+  // agrupa por cliente e pega o primeiro telefone não vazio (id_contato menor)
+  const best: Record<string, string> = {};
+
+  // ordena pra garantir estabilidade
+  const sorted = [...Contacts].sort((a, b) => Number(a.id_contato ?? 0) - Number(b.id_contato ?? 0));
+
+    for (const c of sorted) {
+      const id = keyOf(c.id_cliente);
+      if (best[id]) continue;
+      const tel = normalizePhone(c.telefone);
+      if (tel) best[id] = tel;
+    }
+
+    return best; // { "123": "11999998888" }
+  }, [Contacts]);
+
+  const selectedPhoneOwner = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const cli of filteredClients) {
+      const id = keyOf(cli.id_cliente);
+      if (!selected[id]) continue;
+      if (!cli.ativo) continue;
+      const tel = phoneByClientId[id];
+      if (tel) map.set(tel, id);
+    }
+    return map;
+  }, [filteredClients, selected, phoneByClientId]);
 
   const toggleOne = (id: string | number) =>
     setSelected((prev) => {
@@ -89,13 +118,30 @@ const filteredClients = useMemo(() => {
   const toggleSelectAll = () =>
     setSelected((prev) => {
       const next = { ...prev };
+
       if (allFilteredSelected) {
         filteredClients.forEach((c) => delete next[keyOf(c.id_cliente)]);
-      } else {
-        filteredClients.forEach((c) => (next[keyOf(c.id_cliente)] = true));
+        return next;
       }
-      return next;
+
+      const used = new Set<string>();
+      filteredClients.forEach((c) => {
+        const id = keyOf(c.id_cliente);
+        if (!c.ativo) return;
+
+        const tel = phoneByClientId[id] || "";
+        if (!tel) {
+          // se não tem telefone, você decide: selecionar ou não.
+          // eu recomendo NÃO selecionar automaticamente:
+          return;
+        }
+        if (used.has(tel)) return;
+        used.add(tel);
+        next[id] = true;
     });
+
+    return next;
+  });
 
   const handleResult = (s: any) => {
     setSummary(s);
@@ -108,6 +154,7 @@ const filteredClients = useMemo(() => {
     setMessageSearch("");
   };
 
+  
   return (
                             // h-min - altura Header
     <div className="flex-1 min-h-[calc(100vh-4rem)] bg-[#e6e8ef] py-8"> 
@@ -133,6 +180,8 @@ const filteredClients = useMemo(() => {
               onToggle={toggleOne}
               allFilteredSelected={allFilteredSelected}
               onToggleSelectAll={toggleSelectAll}
+              phoneByClientId={phoneByClientId}
+              selectedPhoneOwner={selectedPhoneOwner}
             />
 
             <div className="bg-white rounded-2xl p-6 shadow-md">

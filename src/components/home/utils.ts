@@ -16,3 +16,10 @@ export function cleanName(raw: string): string {
   const full_name = s.split(" ");
   return full_name.slice(0,2).join(" ")
 }
+
+export const normalizePhone = (input?: string | null) => {
+  if (!input) return "";
+  let digits = String(input).replace(/\D/g, "");
+  if (digits.startsWith("55")) digits = digits.slice(2);
+  return digits; // aqui você pode padronizar DDD+9 se quiser
+};

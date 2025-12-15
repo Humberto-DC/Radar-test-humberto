@@ -1,15 +1,18 @@
-export interface Client {
-  id_cliente: string | number; //
-  Cliente: string; //
-  Limite: number; //
-  data_ultima_compra: string; //
-  ultima_interacao: string; //
-  Razao_social: string; //
-  Vendedor: string; //
-  id_vendedor:  string | number; //
-  Cidade: string; //
+export type Client = {
+  id_cliente: number;
+  Cliente: string;
+  Razao_social: string;
+  Cidade: string;
+  Vendedor: string;
+  Limite: number;
+
+  data_ultima_compra: string | null;     // date no Postgres vem como string
+  ultima_interacao: string | null;       // timestamptz vem como string
+
+  id_vendedor: number | null;
   ativo: boolean;
-}
+};
+
 
 export interface Message {
   id_mensagem: string;
