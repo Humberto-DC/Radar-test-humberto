@@ -6,12 +6,16 @@ export type Client = {
   Vendedor: string;
   Limite: number;
 
-  data_ultima_compra: string | null;     // date no Postgres vem como string
-  ultima_interacao: string | null;       // timestamptz vem como string
+  // agora pode vir "2025-12-01" OU "37"
+  ultima_compra: string | Date | null | undefined
+
+  // pode manter assim, mas também dá pra aceitar number se um dia mudar
+  ultima_interacao: string | Date | null | undefined
 
   id_vendedor: number | null;
   ativo: boolean;
 };
+
 
 
 export interface Message {

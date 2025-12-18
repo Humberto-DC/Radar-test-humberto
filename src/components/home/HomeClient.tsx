@@ -9,7 +9,7 @@ import SendActions from "./SendActions";
 import ResultSummary from "./ResultSummary";
 
 import { Client, Message, SelectedMap, Contacts } from "./types";
-import { daysSince, keyOf, normalizePhone} from "./utils";
+import { daysFrom, keyOf, normalizePhone} from "./utils";
 
 type Props = {
   Clients: Client[];
@@ -42,17 +42,17 @@ export default function HomeClient({ Clients: clients, Messages, Contacts }: Pro
     if (Number.isFinite(minCreditNum) && c.Limite < minCreditNum)
       return false;
 
-    const daysFromLastPurchase = daysSince(c.data_ultima_compra);
+    const daysFromLastPurchase = daysFrom(c.ultima_compra);
     if (Number.isFinite(minDaysNum) && daysFromLastPurchase < minDaysNum)
       return false;
 
-    const daysFromLastInteraction = daysSince(c.ultima_interacao ?? null);
+    const daysFromLastInteraction = daysFrom(c.ultima_interacao ?? null);
     if (Number.isFinite(lastIntNum) && daysFromLastInteraction < lastIntNum)
       return false;
 
     if (sellerTerm) {
       // Ajuste aqui conforme o nome real do campo no tipo Client
-      const sellerName = (c.Vendedor || c.Vendedor || "").toLowerCase();
+      const sellerName = (c.Vendedor || "").toLowerCase();
       if (!sellerName.includes(sellerTerm)) return false;
     }
     return true;

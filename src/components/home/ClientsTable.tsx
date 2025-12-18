@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef } from "react";
 import { Client, SelectedMap } from "./types";
-import { daysSince, keyOf, cleanName } from "./utils";
+import {keyOf, cleanName, daysFrom } from "./utils";
 
 type Props = {
   clients: Client[];
@@ -84,16 +84,15 @@ export default function ClientsTable({
               const isActive = c.ativo === true;
 
               // NÃO MEXI NA SUA LÓGICA DE DATAS
-              const diasCompra = daysSince(c.data_ultima_compra);
-              const textoCompra = Number.isFinite(diasCompra)
-                ? `${diasCompra} dias`
-                : "—";
+              const last_buy = daysFrom(c.ultima_compra);
+              const lastBuyText = Number.isFinite(last_buy) ? `${last_buy} dias` : "—";
 
-              const diasInteracao = daysSince(c.ultima_interacao);
-              const textoInteracao = !c.ultima_interacao ? (
+
+              const lastInteraction = daysFrom(c.ultima_interacao);
+              const lastInteractionText = !c.ultima_interacao ? (
                 <span className="text-gray-400 italic">Nunca</span>
-              ) : Number.isFinite(diasInteracao) ? (
-                `${diasInteracao} dias`
+              ) : Number.isFinite(lastInteraction) ? (
+                `${lastInteraction} dias`
               ) : (
                 <span className="text-gray-400 italic">Nunca</span>
               );
@@ -154,8 +153,8 @@ export default function ClientsTable({
                   </td>
 
                   <td className="p-2">{moneyFormatter.format(c.Limite)}</td>
-                  <td className="p-2">{textoCompra}</td>
-                  <td className="p-2">{textoInteracao}</td>
+                  <td className="p-2">{lastBuyText}</td>
+                  <td className="p-2">{lastInteractionText}</td>
                   <td className="p-2">{cleanName(c.Vendedor)}</td>
 
                   <td className="p-2 w-24">
