@@ -48,10 +48,7 @@ function getRowSortTs(row: HistoryRow): number {
   return new Date("1970-01-01T00:00:00Z").getTime();
 }
 export default function HistoryTable({ rows }: Props) {
-  // ordena do envio mais recente para o mais antigo
   const sorted = [...rows].sort((a, b) => getRowSortTs(b) - getRowSortTs(a));
-
-  // agrupa por dia
 
   const groups = new Map<string, HistoryRow[]>();
   for (const r of sorted) {
@@ -63,7 +60,7 @@ export default function HistoryTable({ rows }: Props) {
   const days = Array.from(groups.entries()).sort(
     ([a], [b]) => parseISO(b).getTime() - parseISO(a).getTime()
   );
-  // nenhum envio
+
   if (days.length === 0) {
     return (
       <div className="py-10 text-center text-sm text-slate-400">
@@ -73,8 +70,8 @@ export default function HistoryTable({ rows }: Props) {
   }
 
   return (
-    <div className="overflow-x-auto overflow-y-hidden pb-2">
-      <div className="flex gap-4 min-w-max">
+    <div className="max-w-full overflow-x-auto overflow-y-hidden pb-2">
+      <div className="flex gap-4 w-max">
         {days.map(([dateKey, items]) => {
           const d = parseISO(dateKey);
 
@@ -82,7 +79,7 @@ export default function HistoryTable({ rows }: Props) {
             ? `Hoje · ${format(d, "dd/MM", { locale: ptBR })}`
             : isYesterday(d)
             ? `Ontem · ${format(d, "dd/MM", { locale: ptBR })}`
-            : format(d, "dd/MM (eee)", { locale: ptBR }); // ex: 14/11 (qui)
+            : format(d, "dd/MM (eee)", { locale: ptBR });
 
           return (
             <div key={dateKey} className="w-72 shrink-0">

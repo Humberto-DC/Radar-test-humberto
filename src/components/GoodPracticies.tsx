@@ -23,7 +23,7 @@ const BestPracticesModal = () => {
         title="Clique aqui para ler as boas práticas antes de começar!"
       >
         <AlertCircle size={28} />
-        <span className="absolute top-0 right-0 p-1 text-xs font-bold text-white bg-yellow-500 rounded-full animate-pulse">!</span>
+        <span className="absolute top-0 right-0 p-1 text-xs font-bold text-white bg-yellow-500 rounded-full animate-pulse z-20">!</span>
       </button>
 
       {/* Modal com as boas práticas */}

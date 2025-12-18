@@ -37,9 +37,9 @@ export default function HistoryClient({ history, queue }: Props) {
   }, [history, search, statusFilter]);
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-[#e6e8ef] px-4 py-6 md:px-8 md:py-1">
-      <div className="max-w-8xl mx-auto my-auto">
-        <div className="rounded-2xl p-4 md:p-6 flex flex-col gap-6">
+    <main className="min-h-[calc(100vh-4rem)] bg-[#e6e8ef] px-4 py-6 md:px-8 md:py-1 overflow-x-hidden">
+      <div className="w-full max-w-[1600px] mx-auto">
+        <div className="rounded-2xl p-4 md:p-6 flex flex-col gap-6 min-w-0">
           <HistoryFilters
             search={search}
             setSearch={setSearch}
@@ -47,16 +47,25 @@ export default function HistoryClient({ history, queue }: Props) {
             setStatusFilter={setStatusFilter}
           />
 
-          {/* layout principal: fila à esquerda, histórico à direita */}
-          <div className="flex flex-col gap-6 lg:flex-row">
-            <div className="w-full lg:w-70">
-              <QueuePanel queue={queue} />
-            </div>
+          <div className="relative w-full min-w-0">
+            {/* fades só no desktop (evita ficar estranho no mobile) */}
+            <div className="pointer-events-none hidden lg:block absolute left-0 top-0 h-full w-2 bg-linear-to-r from-[#e6e8ef] to-transparent z-10" />
+            <div className="pointer-events-none hidden lg:block absolute right-0 top-0 h-full w-12 bg-linear-to-l from-[#e6e8ef] to-transparent" />
 
-            <div className="flex-1">
-              <HistoryTable rows={filtered} />
+            <div className="w-full overflow-x-auto overflow-y-hidden scroll-smooth pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex gap-6 w-max min-w-full">
+                <div className="w-full lg:w-[320px] shrink-0">
+                  <QueuePanel queue={queue} />
+                </div>
+
+                <div className="shrink-0">
+                  <HistoryTable rows={filtered} />
+                </div>
+              </div>
             </div>
           </div>
+
+
         </div>
       </div>
     </main>

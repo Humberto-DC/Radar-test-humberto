@@ -82,7 +82,7 @@ export default function SendActions({
 
         const contact = contacts.find(
           (ct) =>
-            ct.id_cliente === client.id_cliente &&
+            Number(ct.id_cliente) === client.id_cliente &&
             ct.telefone &&
             String(ct.telefone).trim() !== ""
         );

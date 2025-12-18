@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import BestPracticesModal from "../components/GoodPracticies"; // Importe o componente
+import BestPracticesModal from "../components/GoodPracticies";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,19 +24,22 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en" className="overflow-x-hidden">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
+      >
         <Header />
-        <div className="flex pt-16">
-          {/* Sidebar fixa */}
-          <div className="flex">
+
+        <div className="flex pt-16 min-w-0">
+          {/* Sidebar */}
+          <div className="shrink-0">
             <Sidebar />
           </div>
 
-          <div className="flex-1">{children}</div>
+          {/* Conteúdo */}
+          <div className="flex-1 min-w-0">{children}</div>
         </div>
 
-        {/* Adicione o componente BestPracticesModal */}
         <BestPracticesModal />
       </body>
     </html>
