@@ -49,8 +49,8 @@ export default function HistoryClient({ history, queue }: Props) {
 
           <div className="relative w-full min-w-0">
             {/* fades só no desktop (evita ficar estranho no mobile) */}
-            <div className="pointer-events-none hidden lg:block absolute left-0 top-0 h-full w-2 bg-linear-to-r from-[#e6e8ef] to-transparent z-10" />
-            <div className="pointer-events-none hidden lg:block absolute right-0 top-0 h-full w-12 bg-linear-to-l from-[#e6e8ef] to-transparent" />
+            <div className="pointer-events-none hidden lg:block absolute left-0 top-0 h-full w-1 bg-linear-to-r from-[#e6e8ef] to-transparent z-10" />
+            <div className="pointer-events-none hidden lg:block absolute right-0 top-0 h-full w-5 bg-linear-to-l from-[#e6e8ef] to-transparent" />
 
             <div className="w-full overflow-x-auto overflow-y-hidden scroll-smooth pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex gap-6 w-max min-w-full">
