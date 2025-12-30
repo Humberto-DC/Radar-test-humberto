@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { ClienteComContatos } from "@/types/crm";
 import ChecklistBoard from "./ChecklistBoard";
-import { parseLooseDate, daysSince, isInThisWeek, isSameLocalDay , parseLooseNumber} from "@/lib/dates";
+import { parseLooseDate, isInThisWeek, isSameLocalDay , parseLooseNumber} from "@/lib/dates";
 
 type Props = {
   clients: ClienteComContatos[];
@@ -20,7 +20,6 @@ export default function HomeClient({ clients }: Props) {
     const toDo: ClienteComContatos[] = [];
 
     for (const c of localClients) {
-      const lastBuy = parseLooseDate(c.ultima_compra);
       const daysNoBuy = parseLooseNumber(c.ultima_compra);
 
 
