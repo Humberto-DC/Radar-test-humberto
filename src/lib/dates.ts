@@ -9,42 +9,85 @@ function pad2(n: number) {
 export function parseLooseDate(input: string | null): Date | null {
   if (!input) return null;
 
-  const s = input.trim();
+  const s = String(input).trim();
   if (!s) return null;
 
-  // ISO-like
-  const iso = new Date(s);
-  if (!Number.isNaN(iso.getTime())) return iso;
+  // remove hora se vier "dd/mm/yyyy HH:mm:ss" ou "yyyy-mm-dd HH:mm:ss"
+  const onlyDate = s.split(" ")[0];
 
-  // dd/mm/yyyy or dd-mm-yyyy
-  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  // 1) dd/mm/yyyy or dd-mm-yyyy
+  let m = onlyDate.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if (m) {
     const dd = Number(m[1]);
     const mm = Number(m[2]);
     const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    if (!Number.isNaN(d.getTime())) return d;
+
+    // cria em horário local (mais previsível pra "dias desde")
+    const d = new Date(yyyy, mm - 1, dd);
+    return Number.isNaN(d.getTime()) ? null : d;
   }
 
-  // yyyy/mm/dd or yyyy-mm-dd (fallback)
-  const m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-  if (m2) {
-    const yyyy = Number(m2[1]);
-    const mm = Number(m2[2]);
-    const dd = Number(m2[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    if (!Number.isNaN(d.getTime())) return d;
+  // 2) dd/mm/yy or dd-mm-yy  -> assume 20yy (ajuste se você tiver 19xx)
+  m = onlyDate.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+  if (m) {
+    const dd = Number(m[1]);
+    const mm = Number(m[2]);
+    const yy = Number(m[3]);
+    const yyyy = 2000 + yy;
+
+    const d = new Date(yyyy, mm - 1, dd);
+    return Number.isNaN(d.getTime()) ? null : d;
   }
+
+  // 3) yyyy/mm/dd or yyyy-mm-dd
+  m = onlyDate.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (m) {
+    const yyyy = Number(m[1]);
+    const mm = Number(m[2]);
+    const dd = Number(m[3]);
+
+    const d = new Date(yyyy, mm - 1, dd);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  // 4) ISO completo (com T, Z etc.)
+  const iso = new Date(s);
+  if (!Number.isNaN(iso.getTime())) return iso;
 
   return null;
 }
 
+export function parseLooseNumber(input: string | null): number | null {
+  if (input == null) return null;
+
+  const s = String(input).trim();
+  if (!s) return null;
+
+  // pega só dígitos (caso venha "15 dias" ou "15,0")
+  const normalized = s.replace(",", ".").match(/-?\d+(\.\d+)?/);
+  if (!normalized) return null;
+
+  const n = Number(normalized[0]);
+  if (Number.isNaN(n)) return null;
+
+  // dias devem ser >= 0
+  return n < 0 ? null : Math.floor(n);
+}
+
+
 export function daysSince(date: Date | null): number | null {
   if (!date) return null;
+
   const now = new Date();
-  const diff = now.getTime() - date.getTime();
+
+  // normaliza ambos pro início do dia local (evita diferença por horas/fuso)
+  const startA = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startB = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const diff = startB.getTime() - startA.getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
+
 
 export function isSameLocalDay(a: Date, b: Date) {
   return (

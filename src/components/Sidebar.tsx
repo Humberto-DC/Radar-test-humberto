@@ -9,7 +9,6 @@ import {
   MessageCircle,
   User2,
   LogOut,
-  Shield,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState, FormEvent } from "react";
@@ -93,7 +92,7 @@ export default function Sidebar() {
           "hidden md:flex flex-col h-[calc(100vh-64px)]", // considera header fixo com pt-16
           "bg-linear-to-b from-[#2323ff] to-[#0f0f8b] text-white",
           "p-4 transition-all duration-300",
-          isDesktopOpen ? "w-56" : "w-20",
+          isDesktopOpen ? "w-45 lg:w-56" : "w-20",
         ].join(" ")}
       >
         {/* header */}

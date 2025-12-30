@@ -9,6 +9,8 @@ export default async function Page() {
   noStore();
 
   const session = await getServerSession(); // 👈 await
+  console.log("SESSION:", session);
+
   if (!session) redirect("/select-user");
 
   let q = supabaseAdmin.from("clientes").select("*").eq("ativo", true);

@@ -9,13 +9,30 @@ export type AppUser = {
 };
 
 export async function getServerSession(): Promise<AppUser | null> {
-  const cookieStore = await cookies(); // 👈 AGORA É ASYNC
+  const cookieStore = await cookies();
   const raw = cookieStore.get("app_user")?.value;
-
   if (!raw) return null;
 
   try {
-    return JSON.parse(raw) as AppUser;
+    const parsed = JSON.parse(raw) as any;
+
+    if (!parsed?.role || !parsed?.sellerName) return null;
+
+    if (parsed.role === "seller") {
+      const sellerIdNum = Number(parsed.sellerId);
+      if (!Number.isFinite(sellerIdNum)) return null;
+
+      return {
+        role: "seller",
+        sellerId: sellerIdNum,
+        sellerName: String(parsed.sellerName),
+      };
+    }
+
+    return {
+      role: "admin",
+      sellerName: String(parsed.sellerName),
+    };
   } catch {
     return null;
   }

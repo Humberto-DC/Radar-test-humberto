@@ -7,14 +7,20 @@ type Props = {
   todo: ClienteComContatos[];
   doneToday: ClienteComContatos[];
   onMarkDone: (id_cliente: number) => void;
+  onUndoDone: (id_cliente: number) => void;
 };
 
-export default function ChecklistBoard({ todo, doneToday, onMarkDone }: Props) {
+export default function ChecklistBoard({
+  todo,
+  doneToday,
+  onMarkDone,
+  onUndoDone,
+}: Props) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-10 md:grid-cols-2">
       {/* ESQUERDA: PARA FAZER */}
-      <section className="rounded-2xl border border-gray-200 bg-white">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+      <section className="rounded-2xl">
+        <div className="flex items-center justify-between px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-gray-800">Para fazer</h2>
             <p className="text-xs text-gray-500">{todo.length} clientes</p>
@@ -32,7 +38,7 @@ export default function ChecklistBoard({ todo, doneToday, onMarkDone }: Props) {
                 key={c.id_cliente}
                 client={c}
                 variant="todo"
-                onMarkDone={() => onMarkDone(c.id_cliente)}
+                onPrimary={() => onMarkDone(c.id_cliente)}
               />
             ))
           )}
@@ -40,7 +46,7 @@ export default function ChecklistBoard({ todo, doneToday, onMarkDone }: Props) {
       </section>
 
       {/* DIREITA: FEITOS HOJE */}
-      <section className="rounded-2xl border border-gray-200 bg-white">
+      <section className="rounded-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-gray-800">Feitos hoje</h2>
@@ -59,7 +65,7 @@ export default function ChecklistBoard({ todo, doneToday, onMarkDone }: Props) {
                 key={c.id_cliente}
                 client={c}
                 variant="done"
-                onMarkDone={() => onMarkDone(c.id_cliente)}
+                onPrimary={() => onUndoDone(c.id_cliente)}
               />
             ))
           )}

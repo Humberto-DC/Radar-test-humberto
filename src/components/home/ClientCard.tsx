@@ -2,53 +2,70 @@
 
 import { useMemo, useState } from "react";
 import type { ClienteComContatos, ContatoRow } from "@/types/crm";
-import { parseLooseDate, daysSince, formatLocalShort } from "@/lib/dates";
+import { parseLooseNumber, formatLocalShort } from "@/lib/dates";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 import ContactPickerModal from "./ContactPickerModal";
+
 
 type Props = {
   client: ClienteComContatos;
   variant: "todo" | "done";
-  onMarkDone: () => void;
+  onPrimary: () => void;
 };
 
-export default function ClientCard({ client, variant, onMarkDone }: Props) {
+function buildMessage(contactName?: string) {
+  const first = (contactName || "").trim().split(" ")[0];
+  const who = first ? first : "tudo bem";
+  return `Oi, ${who}! Passando pra ver como vocês estão e se posso te ajudar com um novo pedido 😊`;
+}
+
+export default function ClientCard({ client, variant, onPrimary }: Props) {
   const [open, setOpen] = useState(false);
 
-  const lastBuy = useMemo(() => parseLooseDate(client.ultima_compra), [client.ultima_compra]);
-  const d = useMemo(() => daysSince(lastBuy), [lastBuy]);
+  const d = useMemo(
+    () => parseLooseNumber(client.ultima_compra),
+    [client.ultima_compra]
+  );
 
   const lastInteraction = client.ultima_interacao ? new Date(client.ultima_interacao) : null;
 
-  const msg = useMemo(() => {
-    const nome = client.Cliente?.trim() || "tudo bem?";
-    return `Oi, ${nome}! Passando pra ver como vocês estão e se posso te ajudar com um novo pedido 😊`;
-  }, [client.Cliente]);
+  const contactsWithPhone = useMemo(
+    () => (client.contatos || []).filter((c) => !!c.telefone),
+    [client.contatos]
+  );
 
   function handleSend() {
-    const contatos = (client.contatos || []).filter((c) => c.telefone);
+    
+    if (contactsWithPhone.length <= 0) return;
 
-    if (contatos.length <= 0) return; // sem telefone
-    if (contatos.length === 1) {
-      window.open(buildWhatsAppLink(contatos[0].telefone!, msg), "_blank");
+    if (contactsWithPhone.length === 1) {
+      const c = contactsWithPhone[0];
+      var lower = c.nome_contato.toLocaleLowerCase()
+      lower = lower.charAt(0).toUpperCase() + lower.slice(1)
+      const msg = buildMessage(lower);
+      window.open(buildWhatsAppLink(c.telefone!, msg), "_blank");
       return;
     }
+
     setOpen(true);
   }
 
   function pickContact(c: ContatoRow) {
     if (!c.telefone) return;
+    const msg = buildMessage(c.nome_contato);
     window.open(buildWhatsAppLink(c.telefone, msg), "_blank");
     setOpen(false);
   }
 
-  const hasPhone = (client.contatos || []).some((c) => !!c.telefone);
+  const hasPhone = contactsWithPhone.length > 0;
 
   return (
     <div
       className={[
         "rounded-2xl border p-4 shadow-sm transition bg-white",
-        variant === "todo" ? "border-gray-200 hover:shadow-md" : "border-emerald-200 bg-emerald-50/40",
+        variant === "todo"
+          ? "border-gray-200 hover:shadow-md"
+          : "border-[#b6f01f] bg-emerald-50/40",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-3">
@@ -70,17 +87,7 @@ export default function ClientCard({ client, variant, onMarkDone }: Props) {
           </div>
         </div>
 
-        <button
-          onClick={onMarkDone}
-          className={[
-            "shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition",
-            variant === "todo"
-              ? "bg-gray-900 text-white hover:bg-gray-800"
-              : "bg-emerald-600 text-white hover:bg-emerald-500",
-          ].join(" ")}
-        >
-          {variant === "todo" ? "Marcar feito" : "Feito ✓"}
-        </button>
+
       </div>
 
       <div className="mt-3 flex gap-2">
@@ -98,10 +105,15 @@ export default function ClientCard({ client, variant, onMarkDone }: Props) {
         </button>
 
         <button
-          className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
-          onClick={() => alert("Depois podemos abrir uma mini-ficha do cliente aqui.")}
+          onClick={onPrimary}
+          className={[
+            "shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition",
+            variant === "todo"
+              ? "bg-gray-400 text-white hover:bg-gray-800"
+              : "bg-[#b6f01f] text-[#1a1a1a] hover:bg-[#a5d81b]",
+          ].join(" ")}
         >
-          Ver
+          {variant === "todo" ? "Marcar feito" : "Desfazer"}
         </button>
       </div>
 

@@ -2,10 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
-import type { AppUser } from "@/types/auth";
 import UserCard from "./UserCard";
 
 type Seller = { id: number; nome: string };
+
+function firstName(fullName?: string) {
+  if (!fullName) return "";
+  const cleaned = fullName.trim().replace(/\s+/g, " ");
+  return cleaned.split(" ")[0] ?? "";
+}
 
 export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
   const router = useRouter();
@@ -17,6 +22,7 @@ export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
     await fetch("/api/auth/select-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(payload),
     });
 
@@ -30,6 +36,7 @@ export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
     await fetch("/api/auth/select-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(payload),
     });
 
@@ -37,36 +44,34 @@ export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
     router.replace("/");
   }
 
-    function Name(fullName?: string) {
-    if (!fullName) return "";
-    const cleaned = fullName.trim().replace(/\s+/g, " ");
-    return cleaned.split(" ")[0] ?? "";
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-5xl px-4 py-10">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">Quem está logando?</h1>
-          <p className="text-sm text-gray-500">
-            Selecione seu nome para abrir o checklist do dia.
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <div className="text-center">
+          <h1 className="text-3xl font-semibold text-gray-900">
+            Selecione seu usuário
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Escolha seu perfil para acessar o sistema de reativação de clientes
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <UserCard
             title="Admins"
-            subtitle="Acesso a todos os clientes"
+            subtitle="Acesso completo ao sistema"
             badge="Admin"
+            variant="admin"
             onClick={selectAdmin}
           />
 
           {sellers.map((s) => (
             <UserCard
               key={s.id}
-              title={Name(s.nome)}
-              subtitle="Acesso aos seus clientes"
+              title={firstName(s.nome)}
+              subtitle="Acesso à carteira de clientes"
               badge="Vendedor"
+              variant="seller"
               onClick={() => selectSeller(s)}
             />
           ))}
