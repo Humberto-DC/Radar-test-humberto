@@ -1,3 +1,4 @@
+//app\api\interactions\unmark\route.ts
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getServerSession } from "@/lib/serverSession";

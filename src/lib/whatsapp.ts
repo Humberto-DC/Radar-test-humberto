@@ -1,3 +1,5 @@
+//lib\whatsapp.ts
+
 export function normalizePhoneBR(phone: string) {
   // remove tudo que não for número
   const digits = phone.replace(/\D/g, "");

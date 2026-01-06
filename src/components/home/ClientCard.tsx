@@ -1,3 +1,4 @@
+// components/home/ClientCard.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -5,12 +6,14 @@ import type { ClienteComContatos, ContatoRow } from "@/types/crm";
 import { parseLooseNumber, formatLocalShort } from "@/lib/dates";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 import ContactPickerModal from "./ContactPickerModal";
-
+import { getCardStatus, type BoardColumn } from "@/lib/checklistRules";
 
 type Props = {
   client: ClienteComContatos;
-  variant: "todo" | "done";
-  onPrimary: () => void;
+  column: BoardColumn;
+  canUndo: boolean;
+  onMarkContacted: () => void;
+  onUndoContacted: () => void;
 };
 
 function buildMessage(contactName?: string) {
@@ -19,13 +22,31 @@ function buildMessage(contactName?: string) {
   return `Oi, ${who}! Passando pra ver como vocês estão e se posso te ajudar com um novo pedido 😊`;
 }
 
-export default function ClientCard({ client, variant, onPrimary }: Props) {
+function cardClassByStatus(status: "danger" | "warning" | "ok") {
+  // cor do card baseada em compra
+  if (status === "danger") return "bg-red-500 text-white border-red-500";
+  if (status === "warning") return "bg-yellow-300 text-gray-900 border-yellow-300";
+  return "bg-[#b6f01f] text-[#1a1a1a] border-[#b6f01f]";
+}
+
+function pillClass(status: "danger" | "warning" | "ok") {
+  // pílulas legíveis em cima do fundo colorido
+  if (status === "danger") return "bg-white/20 text-white";
+  if (status === "warning") return "bg-black/10 text-gray-900";
+  return "bg-black/10 text-[#1a1a1a]";
+}
+
+export default function ClientCard({
+  client,
+  column,
+  canUndo,
+  onMarkContacted,
+  onUndoContacted,
+}: Props) {
   const [open, setOpen] = useState(false);
 
-  const d = useMemo(
-    () => parseLooseNumber(client.ultima_compra),
-    [client.ultima_compra]
-  );
+  const daysNoBuy = useMemo(() => parseLooseNumber(client.ultima_compra), [client.ultima_compra]);
+  const status = useMemo(() => getCardStatus(daysNoBuy), [daysNoBuy]);
 
   const lastInteraction = client.ultima_interacao ? new Date(client.ultima_interacao) : null;
 
@@ -35,14 +56,13 @@ export default function ClientCard({ client, variant, onPrimary }: Props) {
   );
 
   function handleSend() {
-    
     if (contactsWithPhone.length <= 0) return;
 
     if (contactsWithPhone.length === 1) {
       const c = contactsWithPhone[0];
-      let lower = c.nome_contato.toLocaleLowerCase()
-      lower = lower.charAt(0).toUpperCase() + lower.slice(1)
-      const msg = buildMessage(lower);
+      let nm = (c.nome_contato || "").toLowerCase();
+      nm = nm.charAt(0).toUpperCase() + nm.slice(1);
+      const msg = buildMessage(nm);
       window.open(buildWhatsAppLink(c.telefone!, msg), "_blank");
       return;
     }
@@ -59,35 +79,31 @@ export default function ClientCard({ client, variant, onPrimary }: Props) {
 
   const hasPhone = contactsWithPhone.length > 0;
 
+  const primaryLabel =
+    column === "ok" ? "Marcar contatado" : column === "contacted_no_sale" ? "Marcar contatado" : "Marcar contatado";
+
+  // UX: desfazer só aparece quando faz sentido (quando foi marcado nessa sessão)
+  const showUndo = canUndo;
+
   return (
-    <div
-      className={[
-        "rounded-2xl border p-4 shadow-sm transition bg-white",
-        variant === "todo"
-          ? "border-gray-200 hover:shadow-md"
-          : "border-[#b6f01f] bg-emerald-50/40",
-      ].join(" ")}
-    >
+    <div className={["rounded-2xl border p-4 shadow-sm transition", cardClassByStatus(status)].join(" ")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-gray-900">{client.Cliente}</p>
-          <p className="mt-0.5 text-xs text-gray-500">
+          <p className="truncate text-sm font-semibold">{client.Cliente}</p>
+          <p className="mt-0.5 text-xs opacity-90">
             {client.Cidade} • Limite: {client.Limite}
           </p>
 
           <div className="mt-2 flex flex-wrap gap-2">
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-[11px] text-gray-600">
-              Sem comprar: {d === null ? "—" : `${d} dias`}
+            <span className={["rounded-full px-2 py-1 text-[11px]", pillClass(status)].join(" ")}>
+              Sem comprar: {daysNoBuy === null ? "—" : `${daysNoBuy} dias`}
             </span>
-            {lastInteraction && (
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-[11px] text-gray-600">
-                Último contato: {formatLocalShort(lastInteraction)}
-              </span>
-            )}
+
+            <span className={["rounded-full px-2 py-1 text-[11px]", pillClass(status)].join(" ")}>
+              Último contato: {lastInteraction ? formatLocalShort(lastInteraction) : "—"}
+            </span>
           </div>
         </div>
-
-
       </div>
 
       <div className="mt-3 flex gap-2">
@@ -95,26 +111,28 @@ export default function ClientCard({ client, variant, onPrimary }: Props) {
           onClick={handleSend}
           disabled={!hasPhone}
           className={[
-            "flex-1 rounded-xl border px-3 py-2 text-xs font-semibold transition",
-            hasPhone
-              ? "border-gray-200 bg-white hover:bg-gray-50 text-gray-800"
-              : "border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed",
+            "flex-1 rounded-xl px-3 py-2 text-xs font-semibold transition",
+            hasPhone ? "bg-white/90 hover:bg-white text-gray-900" : "bg-white/40 text-white/70 cursor-not-allowed",
           ].join(" ")}
         >
-          Enviar mensagem
+          Mensagem
         </button>
 
         <button
-          onClick={onPrimary}
-          className={[
-            "shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition",
-            variant === "todo"
-              ? "bg-gray-400 text-white hover:bg-gray-800"
-              : "bg-[#b6f01f] text-[#1a1a1a] hover:bg-[#a5d81b]",
-          ].join(" ")}
+          onClick={onMarkContacted}
+          className="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition bg-black/20 hover:bg-black/30"
         >
-          {variant === "todo" ? "Marcar feito" : "Desfazer"}
+          {primaryLabel}
         </button>
+
+        {showUndo && (
+          <button
+            onClick={onUndoContacted}
+            className="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition bg-black/10 hover:bg-black/20"
+          >
+            Desfazer
+          </button>
+        )}
       </div>
 
       <ContactPickerModal

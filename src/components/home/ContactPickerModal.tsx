@@ -1,3 +1,5 @@
+//components\home\ClientCard.tsx
+
 "use client";
 
 import type { ContatoRow } from "@/types/crm";
