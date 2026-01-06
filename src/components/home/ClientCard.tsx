@@ -22,18 +22,30 @@ function buildMessage(contactName?: string) {
   return `Oi, ${who}! Passando pra ver como vocês estão e se posso te ajudar com um novo pedido 😊`;
 }
 
-function cardClassByStatus(status: "danger" | "warning" | "ok") {
-  // cor do card baseada em compra
-  if (status === "danger") return "bg-red-500 text-white border-red-500";
-  if (status === "warning") return "bg-yellow-300 text-gray-900 border-yellow-300";
-  return "bg-[#b6f01f] text-[#1a1a1a] border-[#b6f01f]";
-}
-
-function pillClass(status: "danger" | "warning" | "ok") {
-  // pílulas legíveis em cima do fundo colorido
-  if (status === "danger") return "bg-white/20 text-white";
-  if (status === "warning") return "bg-black/10 text-gray-900";
-  return "bg-black/10 text-[#1a1a1a]";
+function statusUI(status: "danger" | "warning" | "ok") {
+  switch (status) {
+    case "danger":
+      return {
+        stripe: "border-l-red-400",
+        dot: "bg-red-400",
+        badge: "bg-red-50 text-red-700 ring-red-600/10",
+        btn: "bg-red-400 hover:bg-red-600 text-white",
+      };
+    case "warning":
+      return {
+        stripe: "border-l-amber-300",
+        dot: "bg-amber-300",
+        badge: "bg-amber-50 text-amber-800 ring-amber-600/10",
+        btn: "bg-amber-300 hover:bg-amber-600 text-white", // ou text-white se preferir
+      };
+    default:
+      return {
+        stripe: "border-l-[#b6f01f]",
+        dot: "bg-[#b6f01f]",
+        badge: "bg-gray-50 text-[#b6f01f] ring-emerald-600/10",
+        btn: "bg-[#b6f01f] hover:bg-[#7da516] text-white", // se quiser branco, troque pra text-white
+      };
+  }
 }
 
 export default function ClientCard({
@@ -45,28 +57,34 @@ export default function ClientCard({
 }: Props) {
   const [open, setOpen] = useState(false);
 
-  const daysNoBuy = useMemo(() => parseLooseNumber(client.ultima_compra), [client.ultima_compra]);
-  const status = useMemo(() => getCardStatus(daysNoBuy), [daysNoBuy]);
+  const daysNoBuy = useMemo(
+    () => parseLooseNumber(client.ultima_compra),
+    [client.ultima_compra]
+  );
 
-  const lastInteraction = client.ultima_interacao ? new Date(client.ultima_interacao) : null;
+  const status = useMemo(() => getCardStatus(daysNoBuy), [daysNoBuy]);
+  const ui = statusUI(status);
+
+  const lastInteraction = client.ultima_interacao
+    ? new Date(client.ultima_interacao)
+    : null;
 
   const contactsWithPhone = useMemo(
     () => (client.contatos || []).filter((c) => !!c.telefone),
     [client.contatos]
   );
 
+  const hasPhone = contactsWithPhone.length > 0;
+
   function handleSend() {
-    if (contactsWithPhone.length <= 0) return;
+    if (!hasPhone) return;
 
     if (contactsWithPhone.length === 1) {
       const c = contactsWithPhone[0];
-      let nm = (c.nome_contato || "").toLowerCase();
-      nm = nm.charAt(0).toUpperCase() + nm.slice(1);
-      const msg = buildMessage(nm);
+      const msg = buildMessage(c.nome_contato);
       window.open(buildWhatsAppLink(c.telefone!, msg), "_blank");
       return;
     }
-
     setOpen(true);
   }
 
@@ -77,42 +95,61 @@ export default function ClientCard({
     setOpen(false);
   }
 
-  const hasPhone = contactsWithPhone.length > 0;
-
-  const primaryLabel =
-    column === "ok" ? "Marcar contatado" : column === "contacted_no_sale" ? "Marcar contatado" : "Marcar contatado";
-
-  // UX: desfazer só aparece quando faz sentido (quando foi marcado nessa sessão)
+  const moneyFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
+  const primaryLabel = "Marcar contatado";
   const showUndo = canUndo;
 
   return (
-    <div className={["rounded-2xl border p-4 shadow-sm transition", cardClassByStatus(status)].join(" ")}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{client.Cliente}</p>
-          <p className="mt-0.5 text-xs opacity-90">
-            {client.Cidade} • Limite: {client.Limite}
+    <div
+      className={[
+        "rounded-2xl bg-white border border-gray-200",
+        "border-l-4",
+        ui.stripe,
+        "p-4 shadow-sm hover:shadow-md transition",
+      ].join(" ")}
+    >
+      {/* Header */}
+      <div className="flex items-start gap-3">
+        <span className={["mt-1.5 h-2.5 w-2.5 rounded-full", ui.dot].join(" ")} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-gray-900">
+            {client.Cliente}
           </p>
 
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className={["rounded-full px-2 py-1 text-[11px]", pillClass(status)].join(" ")}>
+          <p className="mt-0.5 text-xs text-gray-500 truncate">
+            {client.Cidade} • Limite: {moneyFormatter.format(client.Limite)}
+          </p>
+
+          {/* Meta (badges leves) */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span
+              className={[
+                "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium",
+                "ring-1 ring-inset",
+                ui.badge,
+              ].join(" ")}
+            >
               Sem comprar: {daysNoBuy === null ? "—" : `${daysNoBuy} dias`}
             </span>
 
-            <span className={["rounded-full px-2 py-1 text-[11px]", pillClass(status)].join(" ")}>
+            <span className="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
               Último contato: {lastInteraction ? formatLocalShort(lastInteraction) : "—"}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="mt-3 flex gap-2">
+      {/* Actions */}
+      <div className="mt-4 flex gap-2">
         <button
           onClick={handleSend}
           disabled={!hasPhone}
           className={[
-            "flex-1 rounded-xl px-3 py-2 text-xs font-semibold transition",
-            hasPhone ? "bg-white/90 hover:bg-white text-gray-900" : "bg-white/40 text-white/70 cursor-not-allowed",
+            "rounded-lg px-4 py-1 text-xs font-semibold transition ml-5",
+            "ring-1 ring-inset",
+            hasPhone
+              ? ui.btn
+              : "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed",
           ].join(" ")}
         >
           Mensagem
@@ -120,7 +157,7 @@ export default function ClientCard({
 
         <button
           onClick={onMarkContacted}
-          className="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition bg-black/20 hover:bg-black/30"
+          className="rounded-lg px-3 py-2 text-xs font-semibold transition bg-white text-gray-800 ring-1 ring-inset ring-gray-200 hover:bg-gray-50"
         >
           {primaryLabel}
         </button>
@@ -128,7 +165,7 @@ export default function ClientCard({
         {showUndo && (
           <button
             onClick={onUndoContacted}
-            className="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition bg-black/10 hover:bg-black/20"
+            className="rounded-xl px-3 py-2 text-xs font-semibold transition text-gray-600 hover:text-gray-800"
           >
             Desfazer
           </button>
