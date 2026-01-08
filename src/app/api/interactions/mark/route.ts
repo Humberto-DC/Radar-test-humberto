@@ -15,20 +15,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing id_cliente" }, { status: 400 });
   }
 
-  // segurança: seller só pode marcar cliente dele (usa vw_web_clientes)
+  // segurança:
+  // - seller normal: só clientes da carteira dele
+  // - sellerId = -1 (Clientes sem vendedor): só clientes com vendedor_id IS NULL
   if (session.role === "seller") {
-    const checkSql = `
+    let checkSql = `
       SELECT 1
       FROM public.vw_web_clientes c
       WHERE c.cadastro_id = $1
-        AND c.vendedor_id = $2::double precision
-      LIMIT 1
     `;
-    const check = await radarPool.query(checkSql, [id_cliente, session.sellerId]);
+    const params: any[] = [id_cliente];
+
+    if (session.sellerId === -1) {
+      checkSql += ` AND c.vendedor_id IS NULL`;
+    } else {
+      params.push(session.sellerId);
+      checkSql += ` AND TRUNC(c.vendedor_id)::int = $2::int`;
+    }
+
+    checkSql += ` LIMIT 1`;
+
+    const check = await radarPool.query(checkSql, params);
     if (check.rowCount === 0) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
   }
+
 
   const now = new Date();
 

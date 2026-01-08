@@ -1,27 +1,12 @@
 //components\auth\select-user\SelectUserClient.tsx
 
 "use client";
-
+import { twoNames } from "@/types/auth"; 
 import { useRouter } from "next/navigation";
 import UserCard from "./UserCard";
 
 type Seller = { id: number; nome: string };
 
-function firstName(fullName?: string) {
-  if (!fullName) return "";
-
-  const cleaned = fullName.trim().replace(/\s+/g, " ");
-  if (!cleaned) return "";
-
-  const first = cleaned.split(" ")[0]?.toUpperCase();
-
-  // 🔹 se começar com "VENDEDOR", mostra o nome completo
-  if (first === "VENDEDOR") {
-    return cleaned;
-  }
-
-  return cleaned.split(" ")[0];
-}
 
 
 export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
@@ -80,13 +65,18 @@ export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
           {sellers.map((s) => (
             <UserCard
               key={s.id}
-              title={firstName(s.nome)}
-              subtitle="Acesso à carteira de clientes"
-              badge="Vendedor"
-              variant="seller"
+              title={twoNames(s.nome)}
+              subtitle={
+                s.id === -1
+                  ? "Clientes sem vendedor atribuído"
+                  : "Acesso à carteira de clientes"
+              }
+              badge={s.id === -1 ? "Sem vendedor" : "Vendedor"}
+              variant={s.id === -1 ? "admin" : "seller"}
               onClick={() => selectSeller(s)}
             />
           ))}
+
         </div>
       </div>
     </div>

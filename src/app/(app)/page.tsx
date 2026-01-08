@@ -51,10 +51,18 @@ export default async function Page() {
   where += ` AND COALESCE(c.cliente_ativo,'S') <> 'N'`;
 
   // seller: filtra carteira
-  if (session.role === "seller") {
+if (session.role === "seller") {
+  // 👇 clientes SEM vendedor
+  if (session.sellerId === -1) {
+    where += ` AND c.vendedor_id IS NULL`;
+  } 
+  // 👇 carteira normal
+  else {
     params.push(session.sellerId);
     where += ` AND TRUNC(c.vendedor_id)::int = $${params.length}::int`;
   }
+}
+
 
   const sql = `
     WITH ultima AS (

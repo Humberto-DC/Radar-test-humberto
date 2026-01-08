@@ -18,7 +18,7 @@ type Props = {
 };
 
 function buildMessage() {
-  return `Oi! Passando pra ver como vocês estão e se posso te ajudar com um novo pedido 😊`;
+  return `Oi! Passando pra ver como você está e se posso te ajudar com um novo pedido 😊`;
 }
 
 function statusUI(status: "danger" | "warning" | "ok") {
@@ -120,7 +120,7 @@ export default function ClientCard({
       <div className="flex items-start gap-3">
         <span className={["mt-1.5 h-2.5 w-2.5 rounded-full", ui.dot].join(" ")} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-gray-900">{client.Cliente}</p>
+          <p className="truncate text-sm font-semibold text-gray-900">{client.id_cliente} {client.Cliente}</p>
 
           <p className="mt-0.5 text-xs text-gray-500 truncate">
             {client.Cidade} • Limite: {moneyFormatter.format(client.Limite)}

@@ -3,18 +3,15 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { LogOut, CircleUserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import { twoNames } from "@/types/auth"; 
 import FeedbackModal, { type FeedbackType } from "./FeedbackModal";
 import HelpModal from "./HelpModal";
 
-function firstName(fullName?: string) {
-  if (!fullName) return "";
-  const cleaned = fullName.trim().replace(/\s+/g, " ");
-  return cleaned.split(" ")[0] ?? "";
-}
+
+
 
 export default function Header({ sellerName }: { sellerName?: string }) {
-  const name = useMemo(() => firstName(sellerName), [sellerName]);
+  const name = useMemo(() => twoNames(sellerName), [sellerName]);
   const router = useRouter();
 
   // Modals
@@ -29,6 +26,7 @@ export default function Header({ sellerName }: { sellerName?: string }) {
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null);
 
+  
   async function handleFeedbackSubmit(e: FormEvent) {
     e.preventDefault();
     setSending(true);
@@ -68,6 +66,8 @@ export default function Header({ sellerName }: { sellerName?: string }) {
       router.refresh();
     }
   }
+
+  
 
   return (
     <>

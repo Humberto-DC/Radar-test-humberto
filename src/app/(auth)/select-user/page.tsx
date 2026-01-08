@@ -30,10 +30,15 @@ export default async function Page() {
     nome_vendedor: string;
   }>(sql);
 
-  const sellers: Seller[] = rows.map((r) => ({
-    id: Math.trunc(Number(r.vendedor_id)),
-    nome: r.nome_vendedor.trim(),
-  }));
-
+  const sellers: Seller[] = [
+    ...rows.map((r) => ({
+      id: Math.trunc(Number(r.vendedor_id)),
+      nome: r.nome_vendedor.trim(),
+    })),
+    {
+      id: -1,
+      nome: "SEM VENDEDOR",
+    },
+  ];
   return <SelectUserClient sellers={sellers} />;
 }
