@@ -51,18 +51,19 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
           </button>
         </div>
 
+        {/* Steps */}
                 {/* Steps */}
         <div className="grid gap-3 sm:grid-cols-2">
         {/* 1) Colunas */}
         <div className="rounded-xl border border-slate-200 p-4">
             <div className="flex items-center gap-2">
-            <CheckCircle2 className="text-emerald-600" size={18} />
+            <CheckCircle2 className="text-slate-700" size={18} />
             <p className="text-sm font-semibold text-slate-800">1) Entenda as colunas</p>
             </div>
 
             <ul className="mt-2 space-y-1 text-sm text-slate-600">
             <li>• <b>Enviar mensagem</b>: Não comprou nem foi contatado recentemente.</li>
-            <li>• <b>Acompanhar</b>: Você mandou mensagem nos últimos 7 dias, mas ainda não comprou.</li>
+            <li>• <b>Acompanhar</b>: Você contatou nos últimos 7 dias, mas ainda não comprou, fique atento no andamento da negocioação.</li>
             <li>• <b>Ok</b>: Compra recente, tudo certo.</li>
             </ul>
         </div>
@@ -84,7 +85,7 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
         {/* 3) Enviar mensagem */}
         <div className="rounded-xl border border-slate-200 p-4">
             <div className="flex items-center gap-2">
-            <Send className="text-[#2323ff]" size={18} />
+            <Send className="text-slate-700"size={18} />
             <p className="text-sm font-semibold text-slate-800">3) Enviar mensagem</p>
             </div>
 
@@ -97,7 +98,7 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
         {/* 4) Marcar como feito + Desfazer */}
         <div className="rounded-xl border border-slate-200 p-4">
             <div className="flex items-center gap-2">
-            <SquareCheckBig className="text-amber-600" size={18} />
+            <SquareCheckBig className="text-slate-700"size={18} />
             <p className="text-sm font-semibold text-slate-800">
                 4) Marcar como feito e desfazer
             </p>

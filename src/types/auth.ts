@@ -12,7 +12,12 @@ export function twoNames(fullName?: string) {
   const cleaned = fullName.trim().replace(/\s+/g, " ");
   if (!cleaned) return "";
 
-  const parts = cleaned.split(" ");
+  // quebra e remove palavras com até 2 letras
+  const parts = cleaned
+    .split(" ")
+    .filter((p) => p.length > 2);
+
+  if (parts.length === 0) return "";
 
   // 🔹 regra especial para "VENDEDOR"
   if (parts[0].toUpperCase() === "VENDEDOR") {
@@ -24,6 +29,7 @@ export function twoNames(fullName?: string) {
     return parts[0];
   }
 
-  // 🔹 dois primeiros nomes
+  // 🔹 dois primeiros nomes válidos
   return parts.slice(0, 2).join(" ");
 }
+
