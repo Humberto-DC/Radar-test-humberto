@@ -10,12 +10,25 @@ function normalizePhotoKey(name?: string) {
     .replace(/\s+/g, " ")
     .toUpperCase();
 
+  // remove "GRUPO " do começo (se tiver)
   const noGrupo = cleaned.startsWith("GRUPO ")
     ? cleaned.slice("GRUPO ".length)
     : cleaned;
 
-  return noGrupo.split(" ")[0] || "";
+  const parts = noGrupo.split(" ").filter(Boolean);
+  if (parts.length === 0) return "";
+
+  const STOP = new Set(["DA", "DE", "DO", "DAS", "DOS", "E"]);
+
+  const first = parts[0];
+
+  // pega o "primeiro sobrenome válido" (ignorando DA/DE/DO...)
+  const surname = parts.slice(1).find((p) => !STOP.has(p)) ?? "";
+
+  return surname ? `${first}_${surname}` : first;
 }
+
+
 
 const EXTS = ["png", "jpg", "jpeg"] as const;
 

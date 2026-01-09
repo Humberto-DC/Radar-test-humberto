@@ -38,7 +38,7 @@ export default function UserCard({
         {/* avatar */}
         <ProfileAvatar
           name={variant === "admin" ? undefined : title}
-          size={64}
+          size={90}
           className={[
             "bg-gray-100 text-[#2323ff]",
             variant === "admin" ? "bg-[#2323ff]/10 text-[#2323ff]" : "",
@@ -47,7 +47,7 @@ export default function UserCard({
         />
 
         {/* nome */}
-        <div className="mt-4 text-xl font-semibold text-gray-900">{title}</div>
+        <div className="mt-4 text-sm font-semibold text-gray-900">{title}</div>
 
         {/* badge */}
         <div className="mt-2">

@@ -22,7 +22,7 @@ export function twoNames(fullName?: string) {
   if (parts.length === 0) return "";
 
   // 🔹 regra especial para "VENDEDOR"
-  if (parts[0].toUpperCase() === "VENDEDOR") {
+  if (parts[0].toUpperCase() === "GRUPO") {
     return parts.slice(0, 3).join(" ");
   }
 
