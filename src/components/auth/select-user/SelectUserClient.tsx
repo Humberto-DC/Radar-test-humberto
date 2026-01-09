@@ -43,7 +43,8 @@ export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6 py-12">
+
         <div className="text-center">
           <h1 className="text-3xl font-semibold text-gray-900">
             Selecione seu usuário
@@ -53,7 +54,8 @@ export default function SelectUserClient({ sellers }: { sellers: Seller[] }) {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
           <UserCard
             title="Admins"
             subtitle="Acesso completo ao sistema"

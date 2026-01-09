@@ -43,7 +43,7 @@ export default function UserCard({
             "bg-gray-100 text-[#2323ff]",
             variant === "admin" ? "bg-[#2323ff]/10 text-[#2323ff]" : "",
           ].join(" ")}
-          fallback={<Icon size={26} className="text-[#2323ff]" />}
+          fallback={<Icon size={60} strokeWidth={1} className="text-[#b6f01f]" />}
         />
 
         {/* nome */}
@@ -55,7 +55,7 @@ export default function UserCard({
             className={[
               "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
               variant === "admin"
-                ? "bg-[#2323ff] text-white"
+                ? "bg-[#b6f01f] text-white"
                 : "bg-gray-100 text-gray-700",
             ].join(" ")}
           >
