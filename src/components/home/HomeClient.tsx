@@ -1,4 +1,3 @@
-// components/home/HomeClient.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -10,7 +9,6 @@ type Props = { clients: ClienteComContatos[] };
 
 export default function HomeClient({ clients }: Props) {
   const [localClients, setLocalClients] = useState(clients);
-  const [prevInteractionMap, setPrevInteractionMap] = useState<Record<number, string | null>>({});
 
   const buckets = useMemo(() => {
     const needs: ClienteComContatos[] = [];
@@ -33,12 +31,22 @@ export default function HomeClient({ clients }: Props) {
 
   async function markContacted(clientId: number) {
     const nowIso = new Date().toISOString();
-    const current = localClients.find((c) => c.id_cliente === clientId)?.ultima_interacao ?? null;
 
-    setPrevInteractionMap((m) => (m[clientId] !== undefined ? m : { ...m, [clientId]: current }));
+    setLocalClients((prev) =>
+      prev.map((c) => {
+        if (c.id_cliente !== clientId) return c;
 
-    setLocalClients((p) =>
-      p.map((c) => (c.id_cliente === clientId ? { ...c, ultima_interacao: nowIso } : c))
+        // ✅ otimista:
+        // - salva prev local (se ainda não tem) pra UI coerente
+        // - marca contato agora
+        // - habilita undo
+        return {
+          ...c,
+          ultima_interacao_prev: c.ultima_interacao_prev ?? c.ultima_interacao ?? null,
+          ultima_interacao: nowIso,
+          can_undo: true,
+        };
+      })
     );
 
     try {
@@ -47,44 +55,84 @@ export default function HomeClient({ clients }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_cliente: clientId }),
       });
+
       if (!res.ok) throw new Error();
-    } catch {
-      setLocalClients((p) =>
-        p.map((c) => (c.id_cliente === clientId ? { ...c, ultima_interacao: current } : c))
+
+      // opcional: sincronizar com retorno do server
+      const json = await res.json().catch(() => null);
+      const serverUlt = json?.data?.ultima_interacao ? new Date(json.data.ultima_interacao).toISOString() : nowIso;
+
+      setLocalClients((prev) =>
+        prev.map((c) => (c.id_cliente === clientId ? { ...c, ultima_interacao: serverUlt, can_undo: true } : c))
       );
-      setPrevInteractionMap((m) => {
-        const copy = { ...m };
-        delete copy[clientId];
-        return copy;
-      });
+    } catch {
+      // rollback simples: melhor seria refetch, mas aqui fazemos rollback conservador
+      setLocalClients((prev) =>
+        prev.map((c) => {
+          if (c.id_cliente !== clientId) return c;
+          // volta para antes
+          return {
+            ...c,
+            ultima_interacao: c.ultima_interacao_prev ?? null,
+            // como não sabemos com certeza, desabilita undo
+            can_undo: false,
+          };
+        })
+      );
       alert("Não foi possível marcar como contatado.");
     }
   }
 
   async function undoContacted(clientId: number) {
-    const restore = prevInteractionMap[clientId] ?? null;
-
-    setLocalClients((p) =>
-      p.map((c) => (c.id_cliente === clientId ? { ...c, ultima_interacao: restore } : c))
+    // otimista: desabilita botão enquanto chama
+    setLocalClients((prev) =>
+      prev.map((c) => (c.id_cliente === clientId ? { ...c, can_undo: false } : c))
     );
 
     try {
       const res = await fetch("/api/interactions/unmark", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_cliente: clientId, restore_ultima_interacao: restore }),
+        body: JSON.stringify({ id_cliente: clientId }),
       });
+
       if (!res.ok) throw new Error();
 
-      setPrevInteractionMap((m) => {
-        const copy = { ...m };
-        delete copy[clientId];
-        return copy;
-      });
+      const json = await res.json();
+      const restoredIso = json?.data?.ultima_interacao
+        ? new Date(json.data.ultima_interacao).toISOString()
+        : null;
+
+      setLocalClients((prev) =>
+        prev.map((c) =>
+          c.id_cliente === clientId
+            ? {
+                ...c,
+                ultima_interacao: restoredIso,
+                // depois do undo, não há mais undo disponível
+                can_undo: false,
+                ultima_interacao_prev: null,
+              }
+            : c
+        )
+      );
     } catch {
+      // se falhar, reabilita undo (porque provavelmente ainda é válido)
+      setLocalClients((prev) =>
+        prev.map((c) => (c.id_cliente === clientId ? { ...c, can_undo: true } : c))
+      );
       alert("Não foi possível desfazer.");
     }
   }
+
+  // ✅ continua compatível com seus componentes atuais
+  const canUndoMap = useMemo(() => {
+    const m: Record<number, string | null> = {};
+    for (const c of localClients) {
+      if (c.can_undo) m[c.id_cliente] = "1";
+    }
+    return m;
+  }, [localClients]);
 
   return (
     <div className="h-[calc(100vh-64px)] bg-gray-50 overflow-hidden">
@@ -95,7 +143,7 @@ export default function HomeClient({ clients }: Props) {
           ok={buckets.ok}
           onMarkContacted={markContacted}
           onUndoContacted={undoContacted}
-          canUndoMap={prevInteractionMap}
+          canUndoMap={canUndoMap}
         />
       </div>
     </div>

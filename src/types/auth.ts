@@ -1,3 +1,5 @@
+//types\auth.ts
+
 export type AppRole = "seller" | "admin";
 
 export type AppUser = {

@@ -1,25 +1,17 @@
+// app/api/interactions/unmark/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/serverSession";
 import { radarPool } from "@/lib/Db";
 
 export async function POST(req: Request) {
   const session = await getServerSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   const id_cliente = Number(body?.id_cliente);
-  const restoreRaw = body?.restore_ultima_interacao as string | null | undefined;
+  if (!id_cliente) return NextResponse.json({ error: "Missing id_cliente" }, { status: 400 });
 
-  if (!id_cliente) {
-    return NextResponse.json({ error: "Missing id_cliente" }, { status: 400 });
-  }
-
-  // segurança: seller só pode alterar cliente dele
-// segurança:
-// - seller normal: só clientes da carteira dele
-// - sellerId = -1 (Clientes sem vendedor): só clientes com vendedor_id IS NULL
+  // segurança: seller só pode alterar cliente dele (ou sem vendedor)
   if (session.role === "seller") {
     let checkSql = `
       SELECT 1
@@ -38,39 +30,29 @@ export async function POST(req: Request) {
     checkSql += ` LIMIT 1`;
 
     const check = await radarPool.query(checkSql, params);
-    if (check.rowCount === 0) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    if (check.rowCount === 0) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-
-  // restore pode ser null (volta pra "sem interação")
-  if (!restoreRaw) {
-    await radarPool.query(
-      `DELETE FROM public.crm_interacoes_radar WHERE cliente_id = $1`,
-      [id_cliente]
-    );
-
-    return NextResponse.json({
-      ok: true,
-      data: { cliente_id: id_cliente, ultima_interacao: null },
-    });
-  }
-
-  const restoreDate = new Date(restoreRaw);
-  if (Number.isNaN(restoreDate.getTime())) {
-    return NextResponse.json({ error: "Invalid restore_ultima_interacao" }, { status: 400 });
-  }
-
-  const upsertSql = `
-    INSERT INTO public.crm_interacoes_radar (cliente_id, ultima_interacao)
-    VALUES ($1, $2)
-    ON CONFLICT (cliente_id)
-    DO UPDATE SET ultima_interacao = EXCLUDED.ultima_interacao
+  const undoSql = `
+    UPDATE public.crm_interacoes_radar
+    SET
+      ultima_interacao = ultima_interacao_prev,
+      ultima_interacao_prev = NULL,
+      prev_set_at = NULL
+    WHERE cliente_id = $1
+      AND ultima_interacao IS NOT NULL
+      AND ultima_interacao::date = CURRENT_DATE
     RETURNING cliente_id, ultima_interacao
   `;
 
-  const { rows } = await radarPool.query(upsertSql, [id_cliente, restoreDate]);
+  const { rows, rowCount } = await radarPool.query(undoSql, [id_cliente]);
+
+  if (rowCount === 0) {
+    return NextResponse.json(
+      { error: "Undo not available (only same-day)" },
+      { status: 409 }
+    );
+  }
 
   return NextResponse.json({ ok: true, data: rows[0] });
 }

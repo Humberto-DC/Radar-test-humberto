@@ -19,6 +19,8 @@ type RadarJoinedRow = {
   tel_celular: string | null;
 
   ultima_interacao: Date | null; // crm_interacoes_radar
+  ultima_interacao_prev: Date | null;
+  can_undo: boolean | null;
   ultima_compra: Date | null;    // vw_web_relacao_vendas_produtos (MAX)
 };
 
@@ -85,6 +87,10 @@ if (session.role === "seller") {
       c.telefone,
       c.tel_celular,
       i.ultima_interacao,
+      i.ultima_interacao_prev,
+      (i.ultima_interacao IS NOT NULL
+      AND i.ultima_interacao::date = CURRENT_DATE
+      AND i.ultima_interacao_prev IS NOT NULL) AS can_undo,
       u.ultima_compra
     FROM public.vw_web_clientes c
     LEFT JOIN public.crm_interacoes_radar i
@@ -115,16 +121,17 @@ if (session.role === "seller") {
       telefone: r.telefone ?? null,
       tel_celular: r.tel_celular ?? null,
 
-
-      // ✅ agora existe: data da última compra (ISO string)
       ultima_compra: r.ultima_compra ? new Date(r.ultima_compra).toISOString() : null,
-
-      // ✅ continua existindo: última interação
       ultima_interacao: r.ultima_interacao ? new Date(r.ultima_interacao).toISOString() : null,
+
+      // ✅ novos
+      ultima_interacao_prev: r.ultima_interacao_prev ? new Date(r.ultima_interacao_prev).toISOString() : null,
+      can_undo: Boolean(r.can_undo),
 
       id_vendedor: idVendedor,
       ativo: isActiveFlag(r.cliente_ativo),
     };
+
 
     return { ...row, contatos: [] };
   });

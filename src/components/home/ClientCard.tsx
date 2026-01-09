@@ -51,7 +51,6 @@ type PhoneOption = { id: string; label: string; phone: string };
 
 export default function ClientCard({
   client,
-  column,
   canUndo,
   onMarkContacted,
   onUndoContacted,

@@ -1,4 +1,4 @@
-//types\crm.ts
+// types/crm.ts
 
 export type ClienteRow = {
   id_cliente: number;
@@ -7,8 +7,12 @@ export type ClienteRow = {
   Cidade: string;
   Vendedor: string;
   Limite: number;
-  ultima_compra: string | null; // text no banco
-  ultima_interacao: string | null; // ISO string (timestamp tz)
+
+  ultima_compra: string | null;            // ISO string
+  ultima_interacao: string | null;         // ISO string
+  ultima_interacao_prev: string | null;    // ISO string (anterior)
+  can_undo: boolean;                       // se pode desfazer hoje
+
   id_vendedor: number | null;
   ativo: boolean;
   telefone?: string | null;

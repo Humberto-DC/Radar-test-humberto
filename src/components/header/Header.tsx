@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { twoNames } from "@/types/auth"; 
 import FeedbackModal, { type FeedbackType } from "./FeedbackModal";
 import HelpModal from "./HelpModal";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 
 
@@ -82,11 +83,14 @@ export default function Header({ sellerName }: { sellerName?: string }) {
       >
         {/* Left */}
         <div className="flex items-center gap-3 min-w-0">
-          <CircleUserRound
-            size={35}
-            strokeWidth={1}
-            className="text-white shrink-0"
-          />
+          <ProfileAvatar
+              name={sellerName}
+              size={35}
+              className="shrink-0 ring-2 ring-white/20"
+              fallback={
+                <CircleUserRound size={24} strokeWidth={1} className="text-white" />
+              }
+            />
 
           {name && (
             <div className="flex items-center gap-2 min-w-0">

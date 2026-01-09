@@ -1,6 +1,8 @@
+// components/auth/select-user/UserCard.tsx
 "use client";
 
 import { Shield, CircleUserRound } from "lucide-react";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 export default function UserCard({
   title,
@@ -26,28 +28,28 @@ export default function UserCard({
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2323ff] focus-visible:ring-offset-2",
       ].join(" ")}
     >
-      {/* leve highlight no hover */}
+      {/* highlight hover */}
       <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
         <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#2323ff]/5" />
         <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-[#b6f01f]/40" />
       </div>
 
       <div className="relative flex flex-col items-center">
-        {/* ícone em círculo */}
-        <div
+        {/* avatar */}
+        <ProfileAvatar
+          name={variant === "admin" ? undefined : title}
+          size={64}
           className={[
-            "flex h-16 w-16 items-center justify-center rounded-full",
             "bg-gray-100 text-[#2323ff]",
             variant === "admin" ? "bg-[#2323ff]/10 text-[#2323ff]" : "",
           ].join(" ")}
-        >
-          <Icon size={26} />
-        </div>
+          fallback={<Icon size={26} className="text-[#2323ff]" />}
+        />
 
         {/* nome */}
         <div className="mt-4 text-xl font-semibold text-gray-900">{title}</div>
 
-        {/* badge pill */}
+        {/* badge */}
         <div className="mt-2">
           <span
             className={[
