@@ -14,7 +14,7 @@ type Props = {
   canUndo: boolean;
   onMarkContacted: () => void;
   onUndoContacted: () => void;
-  onOpenSnooze?: () => void;
+  onOpenCalendar?: () => void;
 };
 
 function buildMessage() {
@@ -55,7 +55,7 @@ export default function ClientCard({
   canUndo,
   onMarkContacted,
   onUndoContacted,
-  onOpenSnooze,
+  onOpenCalendar,
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -185,7 +185,7 @@ export default function ClientCard({
 
         {showSnooze && (
           <button
-            onClick={onOpenSnooze}
+            onClick={onOpenCalendar}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-800"
             title="Cliente pediu pausa (7/15/30 dias)"
           >

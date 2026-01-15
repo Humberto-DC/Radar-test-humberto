@@ -16,7 +16,7 @@ type Props = {
   canUndoMap: Record<number, string | null>;
 
   // ✅ novo
-  onOpenSnooze?: (client: ClienteComContatos) => void;
+  onOpenCalendar?: (client: ClienteComContatos) => void;
 };
 
 export default function BoardColumn({
@@ -28,7 +28,7 @@ export default function BoardColumn({
   onMarkContacted,
   onUndoContacted,
   canUndoMap,
-  onOpenSnooze,
+  onOpenCalendar,
 }: Props) {
   return (
     <section className="rounded-2xl bg-white shadow-sm border border-gray-100 h-full flex flex-col overflow-hidden">
@@ -54,7 +54,7 @@ export default function BoardColumn({
               canUndo={canUndoMap[c.id_cliente] !== undefined}
               onMarkContacted={() => onMarkContacted(c.id_cliente)}
               onUndoContacted={() => onUndoContacted(c.id_cliente)}
-              onOpenSnooze={() => onOpenSnooze?.(c)} // ✅ novo
+              onOpenCalendar={() => onOpenCalendar?.(c)} // ✅ novo
             />
           ))
         )}
