@@ -19,12 +19,12 @@ type RadarJoinedRow = {
   tel_celular: string | null;
 
   ultima_interacao: Date | null;
-  ultima_interacao_prev: Date | null;
-  snooze_until: Date | null; // ✅ ADICIONA
+  proxima_interacao: Date | null;
+  observacoes: string | null;
+
   can_undo: boolean | null;
   ultima_compra: Date | null;
 };
-
 
 function isActiveFlag(v?: string | null) {
   const s = (v ?? "").trim().toUpperCase();
@@ -55,18 +55,15 @@ export default async function Page() {
   where += ` AND COALESCE(c.cliente_ativo,'S') <> 'N'`;
 
   // seller: filtra carteira
-if (session.role === "seller") {
-  // 👇 clientes SEM vendedor
-  if (session.sellerId === -1) {
-    where += ` AND c.vendedor_id IS NULL`;
-  } 
-  // 👇 carteira normal
-  else {
-    params.push(session.sellerId);
-    where += ` AND TRUNC(c.vendedor_id)::int = $${params.length}::int`;
+  if (session.role === "seller") {
+    // clientes SEM vendedor
+    if (session.sellerId === -1) {
+      where += ` AND c.vendedor_id IS NULL`;
+    } else {
+      params.push(session.sellerId);
+      where += ` AND (c.vendedor_id)::int = $${params.length}::int`;
+    }
   }
-}
-
 
   const sql = `
     WITH ultima AS (
@@ -88,11 +85,16 @@ if (session.role === "seller") {
       c.cliente_ativo,
       c.telefone,
       c.tel_celular,
+
       i.ultima_interacao,
-      i.ultima_interacao_prev,
-      i.snooze_until,
-        (i.ultima_interacao IS NOT NULL
-        AND i.ultima_interacao::date = CURRENT_DATE) AS can_undo,
+      i.proxima_interacao,
+      i.observacoes,
+
+      (
+        i.ultima_interacao IS NOT NULL
+        AND i.ultima_interacao::date = CURRENT_DATE
+      ) AS can_undo,
+
       u.ultima_compra
     FROM public.vw_web_clientes c
     LEFT JOIN public.crm_interacoes_radar i
@@ -105,7 +107,6 @@ if (session.role === "seller") {
       u.ultima_compra ASC
     LIMIT 5000
   `;
-
 
   const { rows } = await radarPool.query<RadarJoinedRow>(sql, params);
 
@@ -127,15 +128,14 @@ if (session.role === "seller") {
       ultima_interacao: r.ultima_interacao ? new Date(r.ultima_interacao).toISOString() : null,
 
       // ✅ novos
-      ultima_interacao_prev: r.ultima_interacao_prev ? new Date(r.ultima_interacao_prev).toISOString() : null,
-      can_undo: Boolean(r.can_undo),
-      snooze_until: r.snooze_until ? new Date(r.snooze_until).toISOString() : null,
+      proxima_interacao: r.proxima_interacao ? new Date(r.proxima_interacao).toISOString() : null,
+      observacoes: r.observacoes ?? null,
 
+      can_undo: Boolean(r.can_undo),
 
       id_vendedor: idVendedor,
       ativo: isActiveFlag(r.cliente_ativo),
     };
-
 
     return { ...row, contatos: [] };
   });
