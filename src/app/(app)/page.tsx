@@ -66,41 +66,46 @@ export default async function Page() {
   }
 
   const sql = `
-  WITH ultima AS (
+    WITH ultima AS (
+      SELECT
+        v.cliente_id,
+        MAX(v.data_recebimento) AS ultima_compra
+      FROM public.vw_web_relacao_vendas_produtos v
+      WHERE v.data_recebimento IS NOT NULL
+      GROUP BY v.cliente_id
+    )
     SELECT
-      p.cadastro_id AS cliente_id,
-      MAX(p.data_recebimento) AS ultima_compra
-    FROM public.vw_web_pedidos p
-    WHERE p.data_recebimento IS NOT NULL
-    GROUP BY p.cadastro_id
-  )
-  SELECT
-    c.cadastro_id,
-    c.nome_razao_social,
-    c.nome_fantasia,
-    c.nome_cidade,
-    c.nome_vendedor,
-    c.vendedor_id,
-    c.limite_credito_aprovado,
-    c.cliente_ativo,
-    c.telefone,
-    c.tel_celular,
-    i.ultima_interacao,
-    i.ultima_interacao_prev,
-    i.snooze_until,
-    (i.ultima_interacao IS NOT NULL
-    AND i.ultima_interacao::date = CURRENT_DATE) AS can_undo,
-    u.ultima_compra
-  FROM public.vw_web_clientes c
-  LEFT JOIN public.crm_interacoes_radar i
-    ON i.cliente_id = c.cadastro_id
-  LEFT JOIN ultima u
-    ON u.cliente_id = c.cadastro_id
-  WHERE ${where}
-  ORDER BY
-    (u.ultima_compra IS NULL) ASC,
-    u.ultima_compra ASC
-  LIMIT 5000
+      c.cadastro_id,
+      c.nome_razao_social,
+      c.nome_fantasia,
+      c.nome_cidade,
+      c.nome_vendedor,
+      c.vendedor_id,
+      c.limite_credito_aprovado,
+      c.cliente_ativo,
+      c.telefone,
+      c.tel_celular,
+
+      i.ultima_interacao,
+      i.proxima_interacao,
+      i.observacoes,
+
+      (
+        i.ultima_interacao IS NOT NULL
+        AND i.ultima_interacao::date = CURRENT_DATE
+      ) AS can_undo,
+
+      u.ultima_compra
+    FROM public.vw_web_clientes c
+    LEFT JOIN public.crm_interacoes_radar i
+      ON i.cliente_id = c.cadastro_id
+    LEFT JOIN ultima u
+      ON u.cliente_id = c.cadastro_id
+    WHERE ${where}
+    ORDER BY
+      (u.ultima_compra IS NULL) ASC,
+      u.ultima_compra ASC
+    LIMIT 5000
   `;
 
   const { rows } = await radarPool.query<RadarJoinedRow>(sql, params);
