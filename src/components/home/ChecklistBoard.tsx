@@ -13,7 +13,7 @@ type Props = {
   canUndoMap: Record<number, string | null>;
 
   // ✅ novo
-  onOpenSnooze: (client: ClienteComContatos) => void;
+  onOpenCalendar: (client: ClienteComContatos) => void;
 };
 
 export default function ChecklistBoard({
@@ -23,7 +23,7 @@ export default function ChecklistBoard({
   onMarkContacted,
   onUndoContacted,
   canUndoMap,
-  onOpenSnooze,
+  onOpenCalendar,
 }: Props) {
   return (
     <div className="h-full">
@@ -48,7 +48,7 @@ export default function ChecklistBoard({
           onMarkContacted={onMarkContacted}
           onUndoContacted={onUndoContacted}
           canUndoMap={canUndoMap}
-          onOpenSnooze={onOpenSnooze} // ✅ só precisa aqui (mas pode passar em todas)
+          onOpenCalendar={onOpenCalendar} // ✅ só precisa aqui (mas pode passar em todas)
         />
 
         <BoardColumn

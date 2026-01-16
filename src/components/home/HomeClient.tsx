@@ -3,93 +3,83 @@
 import { useMemo, useState } from "react";
 import type { ClienteComContatos } from "@/types/crm";
 import ChecklistBoard from "./ChecklistBoard";
-import SnoozeModal from "./SnoozeModal";
-import { getBoardColumn, sortByUrgency, shouldHideClient } from "@/lib/checklistRules";
+import CalendarModal from "./CalendarModal";
+import { getBoardColumn, sortByUrgency } from "@/lib/checklistRules";
 
 type Props = { clients: ClienteComContatos[] };
+
+function addDaysISO(days: number) {
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+}
 
 export default function HomeClient({ clients }: Props) {
   const [localClients, setLocalClients] = useState(clients);
 
-  // ✅ Snooze modal state
-  const [snoozeOpen, setSnoozeOpen] = useState(false);
-  const [snoozeTarget, setSnoozeTarget] = useState<ClienteComContatos | null>(null);
+  // ✅ Calendar modal state
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarTarget, setCalendarTarget] = useState<ClienteComContatos | null>(null);
 
-  function openSnooze(client: ClienteComContatos) {
-    setSnoozeTarget(client);
-    setSnoozeOpen(true);
+  function openCalendar(client: ClienteComContatos) {
+    setCalendarTarget(client);
+    setCalendarOpen(true);
   }
 
-  async function snoozeClient(clientId: number, days: 7 | 15 | 30) {
-    const untilIso = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
-
-    // ✅ otimista: já marca snooze e some do board (por causa do shouldHideClient)
+  async function setNextInteraction(clientId: number, dateISO: string) {
     setLocalClients((prev) =>
-      prev.map((c) => (c.id_cliente === clientId ? { ...c, snooze_until: untilIso } : c))
+      prev.map((c) => (c.id_cliente === clientId ? { ...c, proxima_interacao: dateISO } : c))
     );
 
     try {
-      const res = await fetch("/api/interactions/snooze", {
+      const res = await fetch("/api/interactions/set-next", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_cliente: clientId, days }),
+        body: JSON.stringify({ id_cliente: clientId, dateISO }),
       });
 
       if (!res.ok) throw new Error();
 
       const json = await res.json().catch(() => null);
-      const serverUntil = json?.data?.snooze_until
-        ? new Date(json.data.snooze_until).toISOString()
-        : untilIso;
+      const serverNext = json?.data?.proxima_interacao
+        ? new Date(json.data.proxima_interacao).toISOString()
+        : dateISO;
 
       setLocalClients((prev) =>
-        prev.map((c) => (c.id_cliente === clientId ? { ...c, snooze_until: serverUntil } : c))
+        prev.map((c) => (c.id_cliente === clientId ? { ...c, proxima_interacao: serverNext } : c))
       );
     } catch {
-      // rollback: volta a aparecer
-      setLocalClients((prev) =>
-        prev.map((c) => (c.id_cliente === clientId ? { ...c, snooze_until: null } : c))
-      );
-      alert("Não foi possível pausar este cliente.");
+      alert("Não foi possível atualizar a próxima interação.");
     }
   }
 
   const buckets = useMemo(() => {
     const needs: ClienteComContatos[] = [];
-    const contacted: ClienteComContatos[] = [];
+    const follow: ClienteComContatos[] = [];
     const ok: ClienteComContatos[] = [];
 
     for (const c of localClients) {
-      // ✅ some do board se estiver snoozado
-      if (shouldHideClient(c)) continue;
-
       const col = getBoardColumn(c);
       if (col === "needs_message") needs.push(c);
-      else if (col === "contacted_no_sale") contacted.push(c);
+      else if (col === "contacted_no_sale") follow.push(c);
       else ok.push(c);
     }
 
     needs.sort(sortByUrgency);
-    contacted.sort(sortByUrgency);
+    follow.sort(sortByUrgency);
     ok.sort(sortByUrgency);
 
-    return { needs, contacted, ok };
+    return { needs, follow, ok };
   }, [localClients]);
 
   async function markContacted(clientId: number) {
     const nowIso = new Date().toISOString();
+    const nextIso = addDaysISO(7);
 
     setLocalClients((prev) =>
-      prev.map((c) => {
-        if (c.id_cliente !== clientId) return c;
-
-        return {
-          ...c,
-          ultima_interacao_prev: c.ultima_interacao_prev ?? c.ultima_interacao ?? null,
-          ultima_interacao: nowIso,
-          can_undo: true,
-        };
-      })
+      prev.map((c) =>
+        c.id_cliente === clientId
+          ? { ...c, ultima_interacao: nowIso, proxima_interacao: nextIso, can_undo: true }
+          : c
+      )
     );
 
     try {
@@ -106,29 +96,43 @@ export default function HomeClient({ clients }: Props) {
         ? new Date(json.data.ultima_interacao).toISOString()
         : nowIso;
 
+      const serverNext = json?.data?.proxima_interacao
+        ? new Date(json.data.proxima_interacao).toISOString()
+        : nextIso;
+
       setLocalClients((prev) =>
         prev.map((c) =>
-          c.id_cliente === clientId ? { ...c, ultima_interacao: serverUlt, can_undo: true } : c
+          c.id_cliente === clientId
+            ? { ...c, ultima_interacao: serverUlt, proxima_interacao: serverNext, can_undo: true }
+            : c
         )
       );
     } catch {
       setLocalClients((prev) =>
-        prev.map((c) => {
-          if (c.id_cliente !== clientId) return c;
-          return {
-            ...c,
-            ultima_interacao: c.ultima_interacao_prev ?? null,
-            can_undo: false,
-          };
-        })
+        prev.map((c) =>
+          c.id_cliente === clientId
+            ? {
+                ...c,
+                ultima_interacao: null,
+                proxima_interacao: new Date().toISOString(),
+                can_undo: false,
+              }
+            : c
+        )
       );
-      alert("Não foi possível marcar como contatado.");
+      alert("Não foi possível marcar como feito.");
     }
   }
 
   async function undoContacted(clientId: number) {
+    const nowIso = new Date().toISOString();
+
     setLocalClients((prev) =>
-      prev.map((c) => (c.id_cliente === clientId ? { ...c, can_undo: false } : c))
+      prev.map((c) =>
+        c.id_cliente === clientId
+          ? { ...c, ultima_interacao: null, proxima_interacao: nowIso, can_undo: false }
+          : c
+      )
     );
 
     try {
@@ -140,20 +144,20 @@ export default function HomeClient({ clients }: Props) {
 
       if (!res.ok) throw new Error();
 
-      const json = await res.json();
-      const restoredIso = json?.data?.ultima_interacao
+      const json = await res.json().catch(() => null);
+
+      const serverUlt = json?.data?.ultima_interacao
         ? new Date(json.data.ultima_interacao).toISOString()
         : null;
+
+      const serverNext = json?.data?.proxima_interacao
+        ? new Date(json.data.proxima_interacao).toISOString()
+        : nowIso;
 
       setLocalClients((prev) =>
         prev.map((c) =>
           c.id_cliente === clientId
-            ? {
-                ...c,
-                ultima_interacao: restoredIso,
-                can_undo: false,
-                ultima_interacao_prev: null,
-              }
+            ? { ...c, ultima_interacao: serverUlt, proxima_interacao: serverNext, can_undo: false }
             : c
         )
       );
@@ -178,28 +182,28 @@ export default function HomeClient({ clients }: Props) {
       <div className="mx-auto h-full w-full max-w-screen-2xl px-3 sm:px-6 md:px-8 lg:px-10 py-4 sm:py-6">
         <ChecklistBoard
           needs={buckets.needs}
-          contacted={buckets.contacted}
+          contacted={buckets.follow}
           ok={buckets.ok}
           onMarkContacted={markContacted}
           onUndoContacted={undoContacted}
           canUndoMap={canUndoMap}
-          onOpenSnooze={openSnooze}
+          onOpenCalendar={openCalendar}
         />
       </div>
 
-      <SnoozeModal
-        open={snoozeOpen}
+      <CalendarModal
+        open={calendarOpen}
         onClose={() => {
-          setSnoozeOpen(false);
-          setSnoozeTarget(null);
+          setCalendarOpen(false);
+          setCalendarTarget(null);
         }}
-        clientName={snoozeTarget?.Cliente}
-        onConfirm={(days) => {
-          const id = snoozeTarget?.id_cliente;
-          setSnoozeOpen(false);
-          setSnoozeTarget(null);
+        clientName={calendarTarget?.Cliente}
+        onConfirm={(dateISO: string) => {
+          const id = calendarTarget?.id_cliente;
+          setCalendarOpen(false);
+          setCalendarTarget(null);
           if (!id) return;
-          snoozeClient(id, days);
+          setNextInteraction(id, dateISO);
         }}
       />
     </div>
