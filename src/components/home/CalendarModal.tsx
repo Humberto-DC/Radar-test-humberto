@@ -59,7 +59,7 @@ export default function CalendarModal({
     const fmtMonth = new Intl.DateTimeFormat("pt-BR", { month: "short" });
 
     const items: DayItem[] = [];
-    for (let i = 1; i < 30; i++) {
+    for (let i = 0; i < 30; i++) {
       const d = addDays(today, i);
       items.push({
         key: toYYYYMMDD(d),

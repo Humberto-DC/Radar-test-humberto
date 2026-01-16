@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {useEffect, useMemo, useState } from "react";
 import type { ClienteComContatos } from "@/types/crm";
-import { parseLooseDate, daysSince, formatLocalShort } from "@/lib/dates";
+import { parseLooseDate, daysSince, formatLocalShort, formatLocalVeryShort } from "@/lib/dates";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 import { getCardStatus, type BoardColumn } from "@/lib/checklistRules";
-import { SquareCheckBig, AlarmClockOff } from "lucide-react";
+import { SquareCheckBig, AlarmClockOff, NotebookPen } from "lucide-react";
+import NotesModal from "./NotesModal";
 import PhonePickerModal from "./PhonePickerModal";
 
 type Props = {
@@ -49,6 +50,8 @@ function statusUI(status: "danger" | "warning" | "ok") {
 
 type PhoneOption = { id: string; label: string; phone: string };
 
+
+
 export default function ClientCard({
   client,
   column,
@@ -71,6 +74,21 @@ export default function ClientCard({
     () => parseLooseDate(client.ultima_interacao as any),
     [client.ultima_interacao]
   );
+
+  const nextInteraction = useMemo(
+  () => parseLooseDate((client as any).proxima_interacao),
+  [client.proxima_interacao]
+);
+
+const showNextContact = column === "contacted_no_sale";
+
+const contactDate = showNextContact ? nextInteraction : lastInteraction;
+
+const contactLabel = showNextContact
+  ? "Próx. contato"
+  : "Último contato";
+
+
 
   const phoneOptions: PhoneOption[] = useMemo(() => {
     const tel = (client.telefone || "").trim();
@@ -110,64 +128,105 @@ export default function ClientCard({
   // ✅ só na coluna do meio
   const showSnooze = column === "contacted_no_sale";
 
+  const [notesOpen, setNotesOpen] = useState(false);
+
+  const initialNotes = useMemo(
+    () => String((client as any).observacoes ?? ""),
+    [client]
+  );
+
+  const [notes, setNotes] = useState<string>(initialNotes);
+
+  useEffect(() => {
+    setNotes(initialNotes);
+  }, [initialNotes]);
+
+  const hasNotes = notes.trim().length > 0;
+
+
+  async function saveNotes(text: string) {
+    const res = await fetch("/api/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ id_cliente: client.id_cliente, observacoes: text }),
+    });
+
+    // tenta ler json/text pra mostrar o motivo
+    const raw = await res.text();
+    let payload: any = null;
+    try { payload = raw ? JSON.parse(raw) : null; } catch {}
+
+    if (!res.ok) {
+      console.error("notes save failed", { status: res.status, raw, payload });
+      throw new Error(payload?.error || `Falha ao salvar observações (HTTP ${res.status})`);
+    }
+
+    // atualiza UI local (e usa o valor retornado se existir)
+    const saved = payload?.data?.observacoes ?? text;
+    setNotes(saved);
+  }
+
+
+
+
   return (
     <div
       className={[
         "rounded-2xl bg-white border border-gray-200",
         "border-l-4",
         ui.stripe,
-        "p-4 shadow-sm hover:shadow-md transition",
+        "p-3 shadow-sm hover:shadow-md transition",
       ].join(" ")}
     >
       {/* Header */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         <span className={["mt-1.5 h-2.5 w-2.5 rounded-full", ui.dot].join(" ")} />
         <div className="min-w-0 flex-1">
-          <div className="flex">
-            <p className="truncate text-sm font-semibold  text-gray-900">
-            {client.id_cliente} {client.Cliente}         
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate text-sm font-semibold text-gray-900">
+              {client.id_cliente} {client.Cliente}
             </p>
 
             {showUndo && (
               <button
                 onClick={onUndoContacted}
-                className="rounded-xl px-3 py-2 text-xs ml-25 font-semibold transition text-gray-600 hover:text-gray-800"
+                className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold transition text-gray-600 hover:bg-gray-100 hover:text-gray-800"
               >
                 Desfazer
               </button>
             )}
-
           </div>
 
-          <p className="mt-0.5 text-xs text-gray-500 truncate">
+          <p className="mt-0.5 text-[11px] text-gray-500 truncate">
             {client.Cidade} • Limite: {moneyFormatter.format(client.Limite)}
           </p>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-1">
             <span
               className={[
-                "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium",
+                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium",
                 "ring-1 ring-inset",
                 ui.badge,
               ].join(" ")}
             >
-              Sem comprar: {daysNoBuy === null ? "—" : `${daysNoBuy} dias`}
+              Sem compra: {daysNoBuy === null ? "—" : `${daysNoBuy} dias`}
             </span>
 
-            <span className="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
-              Último contato: {lastInteraction ? formatLocalShort(lastInteraction) : "—"}
+            <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
+              {contactLabel}: {contactDate ? formatLocalVeryShort(contactDate) : "—"}
             </span>
           </div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="mt-4 justify-items-center flex gap-2 ml-5 ">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
         <button
           onClick={handleSend}
           disabled={!hasPhone}
           className={[
-            "rounded-lg px-5 py-2 text-xs font-semibold transition",
+            "rounded-lg px-4 py-1.5 text-[11px] font-semibold transition",
             "ring-1 ring-inset",
             hasPhone ? ui.btn : "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed",
           ].join(" ")}
@@ -177,24 +236,35 @@ export default function ClientCard({
 
         <button
           onClick={onMarkContacted}
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition bg-white text-gray-800 ring-1 ring-inset ring-gray-200 hover:bg-gray-50"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition bg-white text-gray-800 ring-1 ring-inset ring-gray-200 hover:bg-gray-50"
         >
           {primaryLabel}
-          <SquareCheckBig size={16} />
+          <SquareCheckBig size={14} />
         </button>
 
         {showSnooze && (
           <button
             onClick={onOpenCalendar}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-800"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-800"
             title="Cliente pediu pausa (7/15/30 dias)"
           >
-
-            <AlarmClockOff size={16} />
+            <AlarmClockOff size={14} />
           </button>
         )}
 
-
+        <button
+          onClick={() => setNotesOpen(true)}
+          className={[
+            "relative flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition",
+            "bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-800",
+          ].join(" ")}
+          title={hasNotes ? "Ver/editar observações" : "Adicionar observação"}
+        >
+          <NotebookPen size={14} />
+          {hasNotes && (
+            <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-blue-600" />
+          )}
+        </button>
       </div>
 
       <PhonePickerModal
@@ -204,6 +274,15 @@ export default function ClientCard({
         options={phoneOptions}
         onPick={pickPhone}
       />
+
+      <NotesModal
+        open={notesOpen}
+        onClose={() => setNotesOpen(false)}
+        clientName={client.Cliente}
+        initialText={notes}
+        onSave={saveNotes}
+      />
     </div>
   );
+
 }

@@ -145,3 +145,12 @@ export function isInThisWeek(date: Date) {
 export function formatLocalShort(date: Date) {
   return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
+
+// lib/dates.ts
+export function formatLocalVeryShort(date: Date) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+  
+  }).format(date);
+}

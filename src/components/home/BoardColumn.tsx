@@ -42,7 +42,8 @@ export default function BoardColumn({
         </div>
       </div>
 
-      <div className="py-3 px-5 space-y-3 mb-3 flex-1 overflow-y-auto light-scrollbar">
+      <div className="py-3 px-4 sm:px-6 xl:px-8 space-y-3 xl:space-y-5 2xl:space-y-5 mb-3 flex-1 overflow-y-auto light-scrollbar">
+
         {clients.length === 0 ? (
           <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-600">{emptyText}</div>
         ) : (
