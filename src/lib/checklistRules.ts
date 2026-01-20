@@ -3,10 +3,10 @@ import type { ClienteComContatos } from "@/types/crm";
 import { parseLooseDate, daysSince } from "@/lib/dates";
 
 export type CardStatus = "danger" | "warning" | "ok";
-export type BoardColumn = "needs_message" | "contacted_no_sale" | "ok";
+export type BoardColumn = "needs_message" | "contacted_no_sale" | "budget_open" | "ok";
 
 /**
- * STATUS DO CARD (baseado apenas em compra)
+ * CARD STATUS (based only on last purchase)
  */
 export function getCardStatus(daysSinceLastPurchase: number | null): CardStatus {
   if (daysSinceLastPurchase === null) return "warning";
@@ -16,53 +16,61 @@ export function getCardStatus(daysSinceLastPurchase: number | null): CardStatus 
 }
 
 /**
- * DEFINIÇÃO DA COLUNA DO BOARD
- *
- * Nomes alinhados com o SQL:
- * - ultima_interacao
- * - proxima_interacao
- * - cliente_id
- * - observacoes
+ * BOARD COLUMN RULES (priority order)
+ * 1) Bought in last 7 days => ok
+ * 2) Has valid open budget => budget_open
+ * 3) Next interaction in the future => contacted_no_sale
+ * 4) Next interaction today/past OR missing => needs_message
  */
 export function getBoardColumn(client: ClienteComContatos): BoardColumn {
   const now = new Date();
 
-  const lastPurchaseDays = daysSince(parseLooseDate(client.ultima_compra as any));
+  const lastPurchaseDate = parseLooseDate(client.ultima_compra);
+  const daysFromLastPurchase = daysSince(lastPurchaseDate);
 
-  // 🟩 COLUNA 3 — comprou recentemente
-  if (lastPurchaseDays !== null && lastPurchaseDays <= 7) return "ok";
+  if (client.tem_orcamento_aberto) {
+    console.log("DEBUG budget candidate", {
+      id: client.id_cliente,
+      ultima_compra: client.ultima_compra,
+      lastPurchaseDate,
+      daysFromLastPurchase,
+      tem_orcamento_aberto: client.tem_orcamento_aberto,
+    });
+  }
 
-  const proximaInteracao = parseLooseDate((client as any).proxima_interacao);
 
-  // Sem próxima interação => precisa mensagem
-  if (!proximaInteracao) return "needs_message";
+  if (daysFromLastPurchase !== null && daysFromLastPurchase <= 7) return "ok";
 
-  // 🟦 COLUNA 1 — próxima interação é hoje ou já passou
-  if (proximaInteracao.getTime() <= now.getTime()) return "needs_message";
+  if (client.tem_orcamento_aberto) return "budget_open";
 
-  // 🟨 COLUNA 2 — próxima interação futura
+  const nextInteractionDate = parseLooseDate(client.proxima_interacao);
+  if (!nextInteractionDate) return "needs_message";
+
+  if (nextInteractionDate.getTime() <= now.getTime()) return "needs_message";
+
   return "contacted_no_sale";
 }
 
+
 /**
- * ORDENAÇÃO
- * - Coluna 2: quanto mais perto a proxima_interacao, mais pra cima
- * - Outras colunas: por tempo sem compra (mais tempo => mais urgente)
+ * SORTING
+ * - If both have next_interaction => earliest first
+ * - If only one has next_interaction => the one WITHOUT date first (more urgent)
+ * - Fallback => longer time without purchase first
  */
 export function sortByUrgency(a: ClienteComContatos, b: ClienteComContatos) {
-  const aProx = parseLooseDate((a as any).proxima_interacao);
-  const bProx = parseLooseDate((b as any).proxima_interacao);
+  const aNext = parseLooseDate(a.proxima_interacao);
+  const bNext = parseLooseDate(b.proxima_interacao);
 
-  // Ambos têm próxima interação => ordenar por data (mais próximo primeiro)
-  if (aProx && bProx) return aProx.getTime() - bProx.getTime();
+  if (aNext && bNext) return aNext.getTime() - bNext.getTime();
+  if (aNext && !bNext) return 1;
+  if (!aNext && bNext) return -1;
 
-  // Quem tem data vai depois/antes? (eu prefiro: quem tem data futura fica depois da urgência)
-  if (aProx && !bProx) return 1;
-  if (!aProx && bProx) return -1;
+  const aLastPurchase = parseLooseDate(a.ultima_compra);
+  const bLastPurchase = parseLooseDate(b.ultima_compra);
 
-  // Fallback: por tempo sem compra
-  const aDays = daysSince(parseLooseDate(a.ultima_compra as any));
-  const bDays = daysSince(parseLooseDate(b.ultima_compra as any));
+  const aDays = daysSince(aLastPurchase);
+  const bDays = daysSince(bLastPurchase);
 
   const aValue = aDays === null ? -1 : aDays;
   const bValue = bDays === null ? -1 : bDays;

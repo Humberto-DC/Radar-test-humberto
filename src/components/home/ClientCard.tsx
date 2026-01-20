@@ -48,7 +48,12 @@ function statusUI(status: "danger" | "warning" | "ok") {
   }
 }
 
-type PhoneOption = { id: string; label: string; phone: string };
+type PhoneOption = {
+  id: string;
+  nome: string;
+  funcao: string | null;
+  phone: string;
+};
 
 
 
@@ -69,6 +74,12 @@ export default function ClientCard({
 
   const status = useMemo(() => getCardStatus(daysNoBuy), [daysNoBuy]);
   const ui = statusUI(status);
+
+  const showBudgetId =
+    (column === "budget_open" || column === "ok")
+
+  const orderId = client.open_budget_id ?? client.last_sale_orcamento_id;
+
 
   const lastInteraction = useMemo(
     () => parseLooseDate(client.ultima_interacao as any),
@@ -91,15 +102,42 @@ const contactLabel = showNextContact
 
 
   const phoneOptions: PhoneOption[] = useMemo(() => {
-    const tel = (client.telefone || "").trim();
-    const cel = (client.tel_celular || "").trim();
+    const contatos = client.contatos ?? [];
 
     const opts: PhoneOption[] = [];
-    if (cel) opts.push({ id: "cel", label: "Celular", phone: cel });
-    if (tel && tel !== cel) opts.push({ id: "tel", label: "Telefone", phone: tel });
 
-    return opts;
-  }, [client.telefone, client.tel_celular]);
+    for (const c of contatos) {
+      const nome = (c.nome_contato ?? "").trim();
+      const funcao = (c.funcao ?? "").trim();
+
+      // seu ContatoRow hoje tem só "telefone" (e nele já vem celular OU telefone)
+      const phone = (c.telefone ?? "").trim();
+      if (!phone) continue;
+
+      const labelBase = nome || "Contato";
+      const label = funcao ? `${labelBase} — ${funcao}` : labelBase;
+
+      opts.push({
+        id: String(c.id_contato),
+        nome: nome || "Contato",
+        funcao: funcao || null,
+        phone,
+      });
+    }
+
+    // remove duplicados por número (caso dois contatos tenham o mesmo)
+    const seen = new Set<string>();
+    const unique = opts.filter((o) => {
+      const key = o.phone.replace(/\D/g, "");
+      if (!key) return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return unique;
+  }, [client.contatos]);
+
 
   const hasPhone = phoneOptions.length > 0;
 
@@ -120,7 +158,7 @@ const contactLabel = showNextContact
     window.open(buildWhatsAppLink(opt.phone, msg), "_blank");
     setOpen(false);
   }
-
+  
   const moneyFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
   const primaryLabel = "Feito";
   const showUndo = canUndo;
@@ -197,10 +235,18 @@ const contactLabel = showNextContact
               </button>
             )}
           </div>
+          <div className=" flex flex-row gap-1 truncate text-[#868E96] mt-0.5 text-[11px]">
+            <p>
+              {client.Cidade} • Limite: {moneyFormatter.format(client.Limite)} 
+            </p>
 
-          <p className="mt-0.5 text-[11px] text-[#868E96] truncate">
-            {client.Cidade} • Limite: {moneyFormatter.format(client.Limite)}
-          </p>
+            {showBudgetId && (
+              <p>
+                 • Pedido: {orderId}
+              </p>
+            )}
+          </div>
+
 
           
         </div>

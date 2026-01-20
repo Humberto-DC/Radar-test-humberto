@@ -8,6 +8,7 @@ import Indicators from "./Indicators";
 type Props = {
   needs: ClienteComContatos[];
   contacted: ClienteComContatos[];
+  budgets: ClienteComContatos[];
   ok: ClienteComContatos[];
   onMarkContacted: (id_cliente: number) => void;
   onUndoContacted: (id_cliente: number) => void;
@@ -18,6 +19,7 @@ type Props = {
 export default function ChecklistBoard({
   needs,
   contacted,
+  budgets, // ✅ add
   ok,
   onMarkContacted,
   onUndoContacted,
@@ -26,15 +28,12 @@ export default function ChecklistBoard({
 }: Props) {
   return (
     <div className="h-full flex flex-col min-h-0">
-      {/* Indicadores: não deve “empurrar” o board pra baixo sem controle */}
       <div className="shrink-0">
-        <Indicators needs={needs} contacted={contacted} ok={ok} />
+        <Indicators needs={needs} contacted={contacted} budgets={budgets} ok={ok} />
       </div>
 
-      {/* Grid: ocupa o resto da altura e não deixa vazar */}
       <div className="flex-1 min-h-0 overflow-hidden">
         <div className="grid h-full grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-4 xl:gap-6 2xl:grid-cols-4 2xl:gap-8 min-w-0">
-
           <BoardColumn
             title="Enviar mensagem"
             subtitle="Último contato a mais de 7 dias"
@@ -61,9 +60,9 @@ export default function ChecklistBoard({
           <BoardColumn
             title="Orçamento"
             subtitle="Orçamento em aberto"
-            emptyText="Nada para acompanhar agora."
-            clients={contacted}
-            column="contacted_no_sale"
+            emptyText="Nenhum orçamento em aberto."
+            clients={budgets} // ✅ FIX AQUI
+            column="budget_open"
             onMarkContacted={onMarkContacted}
             onUndoContacted={onUndoContacted}
             canUndoMap={canUndoMap}

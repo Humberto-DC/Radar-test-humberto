@@ -27,8 +27,8 @@ export function parseLooseDate(input: DateLike): Date | null {
   const raw = String(input).trim();
   if (!raw) return null;
 
-  // Handle common "YYYY-MM-DD HH:mm:ss" by taking the date part
-  const datePart = raw.split(" ")[0];
+  // ✅ Take only the "YYYY-MM-DD" part (works for "YYYY-MM-DD HH:mm:ss" and ISO "YYYY-MM-DDT...")
+  const datePart = raw.split(/[ T]/)[0];
 
   // 1) dd/mm/yyyy or dd-mm-yyyy
   let m = datePart.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
@@ -67,6 +67,7 @@ export function parseLooseDate(input: DateLike): Date | null {
 
   return null;
 }
+
 
 /**
  * Robust number parser for DB/user inputs.
