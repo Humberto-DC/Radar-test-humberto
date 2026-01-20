@@ -9,7 +9,7 @@ export type ClienteRow = {
   Limite: number;
 
   ultima_compra: string | null;   
-  last_sale_orcamento_id: number;        // ISO string
+  last_sale_orcamento_id: number | null;        // ISO string
   ultima_interacao: string | null;         // ISO string
   proxima_interacao: string | null;    // ISO string (anterior)
   observacoes: string | null;

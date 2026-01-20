@@ -21,7 +21,7 @@ type RadarJoinedRow = {
 
   can_undo: boolean | null;
   ultima_compra: Date | null;
-  last_sale_orcamento_id:number;
+  last_sale_orcamento_id:number | null;
 
   orcamentos_abertos: number;
   validade_orcamento_min: Date | null;
@@ -81,16 +81,40 @@ export default async function Page() {
     }
   }
 
+  // ✅ admin: só a carteira destes vendedores
+  if (session.role === "admin") {
+    const ADMIN_SELLER_IDS = [244, 12, 17, 200, 110, 193, 114, 215, 108, 163];
+
+    params.push(ADMIN_SELLER_IDS);
+
+    where += `
+      AND c.vendedor_id IS NOT NULL
+      AND (c.vendedor_id)::int = ANY($${params.length}::int[])
+      AND COALESCE(TRIM(c.nome_vendedor), '') <> ''
+      AND UPPER(TRIM(c.nome_vendedor)) NOT LIKE 'GRUPO%'
+      AND UPPER(TRIM(c.nome_vendedor)) NOT LIKE 'VENDEDOR%'
+    `;
+  }
+
+
   const sql =  `
     WITH last_sale AS (
-      SELECT DISTINCT ON (v.cliente_id)
-        v.cliente_id,
-        v.data_recebimento AS ultima_compra,
-        v.orcamento_id::bigint AS last_sale_orcamento_id
-      FROM public.vw_web_relacao_vendas_produtos v
-      WHERE v.data_recebimento IS NOT NULL
-      ORDER BY v.cliente_id, v.data_recebimento DESC NULLS LAST
+      SELECT DISTINCT ON (o.cadastro_id)
+        o.cadastro_id AS cliente_id,
+        o.data_recebimento AS ultima_compra,
+        o.orcamento_id::bigint AS last_sale_orcamento_id
+      FROM public.orcamentos o
+      WHERE
+        o.pedido_fechado = 'S'
+        AND COALESCE(o.cancelado, 'N') = 'N'
+        AND COALESCE(o.bloqueado, 'N') = 'N'
+        AND o.data_recebimento IS NOT NULL
+      ORDER BY
+        o.cadastro_id,
+        o.data_recebimento DESC,
+        o.orcamento_id DESC
     ),
+
     contatos AS (
       SELECT
         cc.cadastro_id,
@@ -220,7 +244,7 @@ export default async function Page() {
     tel_celular: principal,
 
     ultima_compra: r.ultima_compra ? new Date(r.ultima_compra).toISOString() : null,
-    last_sale_orcamento_id: r.last_sale_orcamento_id,
+    last_sale_orcamento_id: lastSaleOrcamentoId,
     ultima_interacao: r.ultima_interacao ? new Date(r.ultima_interacao).toISOString() : null,
     proxima_interacao: r.proxima_interacao ? new Date(r.proxima_interacao).toISOString() : null,
     observacoes: r.observacoes ?? null,
@@ -244,3 +268,4 @@ export default async function Page() {
 
   return <HomeClient clients={enriched} />;
 }
+
