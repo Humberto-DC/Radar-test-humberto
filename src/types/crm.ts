@@ -8,7 +8,8 @@ export type ClienteRow = {
   Vendedor: string;
   Limite: number;
 
-  ultima_compra: string | null;            // ISO string
+  ultima_compra: string | null;   
+  last_sale_orcamento_id: number;        // ISO string
   ultima_interacao: string | null;         // ISO string
   proxima_interacao: string | null;    // ISO string (anterior)
   observacoes: string | null;
@@ -18,6 +19,11 @@ export type ClienteRow = {
   ativo: boolean;
   telefone?: string | null;
   tel_celular?: string | null;
+  orcamentos_abertos: number;
+  validade_orcamento_min: string | null; // ISO
+  tem_orcamento_aberto?: boolean; // ✅ adiciona isso
+  open_budget_id?: number | null; // ✅ novo
+
 };
 
 export type ContatoRow = {

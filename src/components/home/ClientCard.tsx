@@ -48,7 +48,12 @@ function statusUI(status: "danger" | "warning" | "ok") {
   }
 }
 
-type PhoneOption = { id: string; label: string; phone: string };
+type PhoneOption = {
+  id: string;
+  nome: string;
+  funcao: string | null;
+  phone: string;
+};
 
 
 
@@ -69,6 +74,12 @@ export default function ClientCard({
 
   const status = useMemo(() => getCardStatus(daysNoBuy), [daysNoBuy]);
   const ui = statusUI(status);
+
+  const showBudgetId =
+    (column === "budget_open" || column === "ok")
+
+  const orderId = client.open_budget_id ?? client.last_sale_orcamento_id;
+
 
   const lastInteraction = useMemo(
     () => parseLooseDate(client.ultima_interacao as any),
@@ -91,15 +102,42 @@ const contactLabel = showNextContact
 
 
   const phoneOptions: PhoneOption[] = useMemo(() => {
-    const tel = (client.telefone || "").trim();
-    const cel = (client.tel_celular || "").trim();
+    const contatos = client.contatos ?? [];
 
     const opts: PhoneOption[] = [];
-    if (cel) opts.push({ id: "cel", label: "Celular", phone: cel });
-    if (tel && tel !== cel) opts.push({ id: "tel", label: "Telefone", phone: tel });
 
-    return opts;
-  }, [client.telefone, client.tel_celular]);
+    for (const c of contatos) {
+      const nome = (c.nome_contato ?? "").trim();
+      const funcao = (c.funcao ?? "").trim();
+
+      // seu ContatoRow hoje tem só "telefone" (e nele já vem celular OU telefone)
+      const phone = (c.telefone ?? "").trim();
+      if (!phone) continue;
+
+      const labelBase = nome || "Contato";
+      const label = funcao ? `${labelBase} — ${funcao}` : labelBase;
+
+      opts.push({
+        id: String(c.id_contato),
+        nome: nome || "Contato",
+        funcao: funcao || null,
+        phone,
+      });
+    }
+
+    // remove duplicados por número (caso dois contatos tenham o mesmo)
+    const seen = new Set<string>();
+    const unique = opts.filter((o) => {
+      const key = o.phone.replace(/\D/g, "");
+      if (!key) return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return unique;
+  }, [client.contatos]);
+
 
   const hasPhone = phoneOptions.length > 0;
 
@@ -120,7 +158,7 @@ const contactLabel = showNextContact
     window.open(buildWhatsAppLink(opt.phone, msg), "_blank");
     setOpen(false);
   }
-
+  
   const moneyFormatter = useMemo(() => new Intl.NumberFormat("pt-BR"), []);
   const primaryLabel = "Feito";
   const showUndo = canUndo;
@@ -173,7 +211,7 @@ const contactLabel = showNextContact
   return (
     <div
       className={[
-        "rounded-2xl bg-white border border-gray-200",
+        "rounded-2xl bg-white border border-[#E9ECEF]",
         "border-l-4",
         ui.stripe,
         "p-3 shadow-sm hover:shadow-md transition",
@@ -184,44 +222,54 @@ const contactLabel = showNextContact
         <span className={["mt-1.5 h-2.5 w-2.5 rounded-full", ui.dot].join(" ")} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="truncate text-sm font-semibold text-gray-900">
+            <p className="truncate text-sm font-semibold text-[#212529]">
               {client.id_cliente} {client.Cliente}
             </p>
 
             {showUndo && (
               <button
                 onClick={onUndoContacted}
-                className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold transition text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+                className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold transition text-[#495057] hover:bg-gray-100 hover:text-gray-800"
               >
                 Desfazer
               </button>
             )}
           </div>
+          <div className=" flex flex-row gap-1 truncate text-[#868E96] mt-0.5 text-[11px]">
+            <p>
+              {client.Cidade} • Limite: {moneyFormatter.format(client.Limite)} 
+            </p>
 
-          <p className="mt-0.5 text-[11px] text-gray-500 truncate">
-            {client.Cidade} • Limite: {moneyFormatter.format(client.Limite)}
-          </p>
-
-          <div className="mt-2 flex flex-wrap gap-1">
-            <span
-              className={[
-                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium",
-                "ring-1 ring-inset",
-                ui.badge,
-              ].join(" ")}
-            >
-              Sem compra: {daysNoBuy === null ? "—" : `${daysNoBuy} dias`}
-            </span>
-
-            <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
-              {contactLabel}: {contactDate ? formatLocalVeryShort(contactDate) : "—"}
-            </span>
+            {showBudgetId && (
+              <p>
+                 • Pedido: {orderId}
+              </p>
+            )}
           </div>
+
+
+          
         </div>
       </div>
 
       {/* Actions */}
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+
+      <div className="mt-2 flex flex-wrap gap-1">
+        <span
+          className={[
+          " rounded-full px-2 py-0.5 text-[11px] font-medium",
+          "ring-1 ring-inset",
+            ui.badge,
+            ].join(" ")}
+          >
+          Sem compra: {daysNoBuy === null ? "—" : `${daysNoBuy} dias`}
+        </span>
+
+        <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-[#495057] ring-1 ring-inset ring-gray-200">
+          {contactLabel}: {contactDate ? formatLocalVeryShort(contactDate) : "—"}
+        </span>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1">
         <button
           onClick={handleSend}
           disabled={!hasPhone}
@@ -236,17 +284,16 @@ const contactLabel = showNextContact
 
         <button
           onClick={onMarkContacted}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition bg-white text-gray-800 ring-1 ring-inset ring-gray-200 hover:bg-gray-50"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition bg-white text-[#495057] ring-1 ring-inset ring-gray-200 hover:bg-gray-50"
         >
           {primaryLabel}
-          <SquareCheckBig size={14} />
+          <SquareCheckBig size={14} className="text-[#495057]" />
         </button>
 
         {showSnooze && (
           <button
             onClick={onOpenCalendar}
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-800"
-            title="Cliente pediu pausa (7/15/30 dias)"
           >
             <AlarmClockOff size={14} />
           </button>

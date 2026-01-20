@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ClienteComContatos } from "@/types/crm";
 import ChecklistBoard from "./ChecklistBoard";
 import CalendarModal from "./CalendarModal";
@@ -54,20 +54,24 @@ export default function HomeClient({ clients }: Props) {
   const buckets = useMemo(() => {
     const needs: ClienteComContatos[] = [];
     const follow: ClienteComContatos[] = [];
+    const budgets: ClienteComContatos[] = [];
     const ok: ClienteComContatos[] = [];
+
 
     for (const c of localClients) {
       const col = getBoardColumn(c);
       if (col === "needs_message") needs.push(c);
       else if (col === "contacted_no_sale") follow.push(c);
+      else if (col === "budget_open") budgets.push(c)
       else ok.push(c);
     }
 
     needs.sort(sortByUrgency);
     follow.sort(sortByUrgency);
+    budgets.sort(sortByUrgency)
     ok.sort(sortByUrgency);
 
-    return { needs, follow, ok };
+    return { needs, follow, budgets, ok };
   }, [localClients]);
 
   async function markContacted(clientId: number) {
@@ -169,6 +173,20 @@ export default function HomeClient({ clients }: Props) {
     }
   }
 
+useEffect(() => {
+  const openBudget = localClients.filter((c) => c.tem_orcamento_aberto);
+  const inBudgetColumn = localClients.filter((c) => getBoardColumn(c) === "budget_open");
+  const openBudgetButOk = localClients.filter(
+    (c) => c.tem_orcamento_aberto && getBoardColumn(c) === "ok"
+  );
+
+  console.log("openBudget (has_open_budget):", openBudget.map(c => c.id_cliente));
+  console.log("budget_open column:", inBudgetColumn.map(c => c.id_cliente));
+  console.log("openBudget but OK (bought <=7d):", openBudgetButOk.map(c => c.id_cliente));
+}, [localClients]);
+
+
+
   const canUndoMap = useMemo(() => {
     const m: Record<number, string | null> = {};
     for (const c of localClients) {
@@ -178,11 +196,13 @@ export default function HomeClient({ clients }: Props) {
   }, [localClients]);
 
   return (
-    <div className="h-[calc(100vh-64px)] bg-gray-50 overflow-hidden">
-      <div className="mx-auto h-full w-full max-w-screen-2xl px-3 sm:px-6 md:px-8 lg:px-10 py-4 sm:py-6">
+    <div className="h-[calc(100vh-64px)] bg-[#F8F9FA] overflow-hidden">
+      <div className="mx-auto h-full min-h-0 w-full max-w-screen-none px-2 sm:px-6 md:px-8 lg:px-10 py-4 sm:py-6">
+
         <ChecklistBoard
           needs={buckets.needs}
           contacted={buckets.follow}
+          budgets={buckets.budgets}
           ok={buckets.ok}
           onMarkContacted={markContacted}
           onUndoContacted={undoContacted}

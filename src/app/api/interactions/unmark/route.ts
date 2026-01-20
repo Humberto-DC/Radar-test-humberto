@@ -36,11 +36,12 @@ export async function POST(req: Request) {
     UPDATE public.crm_interacoes_radar
     SET
       ultima_interacao = NULL,
-      proxima_interacao = NOW()
+      proxima_interacao = CURRENT_DATE  -- hoje (00:00) garante que NÃO é futuro
     WHERE cliente_id = $1
       AND ultima_interacao IS NOT NULL
       AND ultima_interacao::date = CURRENT_DATE
     RETURNING cliente_id, ultima_interacao, proxima_interacao, observacoes;
+
   `;
 
   const { rows, rowCount } = await radarPool.query(sql, [id_cliente]);

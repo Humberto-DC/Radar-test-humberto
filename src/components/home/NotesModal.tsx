@@ -34,17 +34,17 @@ export default function NotesModal({
       <div className="w-full max-w-lg rounded-3xl bg-white shadow-2xl ring-1 ring-black/5">
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
-            <div className="text-xs font-medium text-gray-500">Observações</div>
-            <h2 className="mt-1 text-lg font-semibold text-gray-900">
+            <div className="text-lg font-semibold text-[#212529]">Observações</div>
+            <h2 className="mt-1 text-sm  text-[#495057]">
               {clientName ?? "Cliente"}
             </h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-[#495057]">
               Anote algo que precise lembrar depois.
             </p>
           </div>
 
           <button
-            className="rounded-full p-2 text-gray-500 hover:bg-gray-100"
+            className="rounded-full p-2 text-[#495057] hover:bg-[#868E96]"
             onClick={onClose}
             aria-label="Fechar"
           >
@@ -57,9 +57,9 @@ export default function NotesModal({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Ex: Quer orçamento do Produto X. Fazer ligação"
-            className="min-h-35 w-full resize-none rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-900 outline-none focus:border-gray-300 focus:ring-4 focus:ring-gray-100"
+            className="min-h-35 w-full resize-none rounded-2xl border border-[#E9ECEF] bg-white p-4 text-sm text-gray-900 outline-none focus:border-gray-300 focus:ring-4 focus:ring-gray-100"
           />
-          <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+          <div className="mt-2 flex items-center justify-between text-xs text-[#868E96]">
             <span>{count}/800</span>
             <span className="hidden sm:inline">Dica: seja curto e objetivo</span>
           </div>
