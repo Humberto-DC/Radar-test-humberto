@@ -26,24 +26,24 @@ function statusUI(status: "danger" | "warning" | "ok") {
   switch (status) {
     case "danger":
       return {
-        stripe: "border-l-red-400",
-        dot: "bg-red-400",
-        badge: "bg-red-50 text-red-700 ring-red-600/0",
-        btn: "bg-red-400 hover:bg-red-600 text-white",
+        stripe: "border-l-[#FF676F]",
+        dot: "bg-[#FF676F]",
+        badge: "bg-[#FF676F]/15 text-gray-600 ring-red-600/0",
+        btn: "bg-[#FF676F] hover:bg-[#FA2F3A] text-white",
       };
     case "warning":
       return {
-        stripe: "border-l-amber-300",
-        dot: "bg-amber-300",
-        badge: "bg-amber-50 text-amber-800 ring-amber-600/0",
-        btn: "bg-amber-300 hover:bg-amber-600 text-white",
+        stripe: "border-l-[#FFE865]",
+        dot: "bg-[#FFE865]",
+        badge: "bg-[#FFE865]/30 text-gray-600 ring-amber-600/0",
+        btn: "bg-[#FFE865] hover:bg-[#FBDA19] text-white",
       };
     default:
       return {
-        stripe: "border-l-[#b6f01f]",
-        dot: "bg-[#b6f01f]",
-        badge: "bg-gray-50 text-[#b6f01f] ring-emerald-600/10",
-        btn: "bg-[#b6f01f] hover:bg-[#7da516] text-white",
+        stripe: "border-l-[#80ef80]",
+        dot: "bg-[#80ef80]",
+        badge: "bg-[#80ef80]/15 text-gray-600 ring-[#80ef80]/20",
+        btn: "bg-[#80ef80] hover:bg-[#5BD25B] text-white",
       };
   }
 }
