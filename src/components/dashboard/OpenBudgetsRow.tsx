@@ -20,7 +20,7 @@ export default function OpenBudgetsRow({ clients }: { clients: ClienteComContato
             Nenhum orçamento aberto 🎉
           </div>
         ) : (
-          <div className="flex gap-3 overflow-auto pb-2 pr-2 snap-x snap-mandatory light-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 flex-col cols-3 pb-2 pr-2 snap-x snap-mandatory light-scrollbar">
             {clients.map((c) => (
               <div
                 key={c.id_cliente}

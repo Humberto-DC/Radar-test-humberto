@@ -78,11 +78,8 @@ export default function DailyGoalCard({
         </div>
 
         <div className="rounded-xl border border-gray-200 p-3">
-          <div className="text-xs text-[#6c757d]">Necessário / dia</div>
+          <div className="text-xs text-[#6c757d]">Vendas / dia</div>
           <div className="text-base font-semibold text-[#212529]">{formatBRL(porDia)}</div>
-          <div className="mt-1 text-[11px] text-[#6c757d]">
-            {restam} dias úteis restantes
-          </div>
         </div>
       </div>
 

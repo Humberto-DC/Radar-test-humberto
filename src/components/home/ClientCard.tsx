@@ -19,7 +19,7 @@ type Props = {
 };
 
 function buildMessage() {
-  return `Oi! Passando pra ver como você está e se posso te ajudar com um novo pedido 😊`;
+  return `Oi! Passando pra ver como você está e se posso te ajudar com um novo pedido`;
 }
 
 function statusUI(status: "danger" | "warning" | "ok") {

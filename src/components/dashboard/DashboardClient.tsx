@@ -3,7 +3,9 @@
 import type { ClienteComContatos } from "@/types/crm";
 import OpenBudgetsRow from "./OpenBudgetsRow";
 import BudgetAchieved from "./BudgetAchieved";
-import DailyGoalCard from "./DailyGoal";
+import DailyGoalCard from "./GoalsCard";
+import DaysCard from "./DaysCard";
+import DevolutionsCard from "./DevolutionCard";
 type SellerKpiRow = {
   vendedor_id: number | string;
   vendedor: string | null;
@@ -40,16 +42,16 @@ export default function DashboardClient({
 
   return (
     <div>
-      <div className="mx-auto w-full max-w-screen-2xl px-2 sm:px-6 md:px-8 lg:px-10 py-1 space-y-6">
+      <div className="mx-auto w-full max-w-screen-3xl px-1 sm:px-6 md:px-8 lg:px-10 py-1 space-y-6">
         {/* Topo agora com KPIs */}
-        <div className="rounded-2xl bg-white p-6">
+        <div className="rounded-2xl bg-white p-2">
 
           {!kpi ? (
-            <p className="mt-2 text-sm text-[#495057]">
+            <p className="text-sm text-[#495057]">
               Sem dados de vendas no mês atual.
             </p>
           ) : (
-            <div className="mt-4 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-4 grid gap-3 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
               <BudgetAchieved
                 value={toNumber(kpi.venda_liquida)}
                 target={toNumber(kpi.meta)}
@@ -61,6 +63,16 @@ export default function DashboardClient({
                 uteisMes={kpi.uteis_mes ?? 0}
                 corridos={kpi.corridos ?? 0}
                 restam={kpi.restam ?? 0}
+              />
+              <DaysCard
+                uteisMes={kpi.uteis_mes ?? 0}
+                corridos={kpi.corridos ?? 0}
+                restam={kpi.restam ?? 0}
+              />
+              <DevolutionsCard
+                devolucoes={toNumber(kpi.devolucoes)}
+                taxaDev={kpi.taxa_dev}
+                faturamentoBruto={toNumber(kpi.faturamento_bruto)}
               />
 
               
