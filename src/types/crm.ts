@@ -39,3 +39,4 @@ export type ContatoRow = {
 export type ClienteComContatos = ClienteRow & {
   contatos: ContatoRow[];
 };
+

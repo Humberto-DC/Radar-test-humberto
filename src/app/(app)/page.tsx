@@ -82,6 +82,7 @@ export default async function Page() {
     }
   }
 
+
   // ✅ admin: só a carteira destes vendedores
   if (session.role === "admin") {
     const ADMIN_SELLER_IDS = [244, 12, 17, 200, 110, 193, 114, 215, 108, 163];
@@ -271,4 +272,3 @@ export default async function Page() {
 
   return <HomeClient clients={enriched} />;
 }
-
