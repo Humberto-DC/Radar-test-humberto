@@ -61,7 +61,6 @@ function pickClientName(r: RadarJoinedRow) {
 }
 
 export default async function Page() {
-  const nowISO = new Date().toISOString();
   noStore();
 
   const session = await getServerSession();
@@ -271,5 +270,5 @@ export default async function Page() {
   return { ...row, contatos };
 });
 
-  return <HomeClient clients={enriched} nowISO={nowISO}/>;
+  return <HomeClient clients={enriched} />;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import type { OpenBudgetCard } from "@/types/dashboard";
+import type { ClienteComContatos } from "@/types/crm";
 import OpenBudgetsRow from "./OpenBudgetsRow";
 import BudgetAchieved from "./BudgetAchieved";
 import DailyGoalCard from "./GoalsCard";
@@ -35,7 +35,7 @@ export default function DashboardClient({
   openBudgetClients,
   sellerKpis,
 }: {
-  openBudgetClients: OpenBudgetCard[];
+  openBudgetClients: ClienteComContatos[];
   sellerKpis: SellerKpiRow[];
 }) {
   const kpi = sellerKpis?.[0] ?? null;
