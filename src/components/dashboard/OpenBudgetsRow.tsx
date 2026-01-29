@@ -1,7 +1,7 @@
 "use client";
 
 import type { OpenBudgetCard } from "@/types/dashboard";
-import ClientCard from "@/components/dashboard/ClientCard";
+import ClientCard from "@/components/dashboard/DashboardClientCard";
 
 export default function OpenBudgetsRow({ clients }: { clients: OpenBudgetCard[] }) {
   return (
