@@ -6,13 +6,16 @@ import ChecklistBoard from "./ChecklistBoard";
 import CalendarModal from "./CalendarModal";
 import { getBoardColumn, sortByUrgency } from "@/lib/checklistRules";
 
-type Props = { clients: ClienteComContatos[] };
+type Props = { 
+  clients: ClienteComContatos[];
+  nowISO: string;
+};
 
 function addDaysISO(days: number) {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export default function HomeClient({ clients }: Props) {
+export default function HomeClient({ clients , nowISO}: Props) {
   const [localClients, setLocalClients] = useState(clients);
 
   // ✅ Calendar modal state
@@ -208,6 +211,7 @@ useEffect(() => {
           onUndoContacted={undoContacted}
           canUndoMap={canUndoMap}
           onOpenCalendar={openCalendar}
+          nowISO={nowISO}
         />
       </div>
 

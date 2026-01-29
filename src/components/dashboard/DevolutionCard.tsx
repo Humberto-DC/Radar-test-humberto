@@ -35,8 +35,8 @@ function StatRow({
   return (
     <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3">
       <div className="flex flex-col">
-        <p className="text-sm font-normal text-slate-600">{label}</p>
-        <div className="text-xs text-slate-600">{helper}</div>
+        <p className="text-sm font- text-slate-700">{label}</p>
+        <div className="text-xs text-slate-600 font-light">{helper}</div>
       </div>
       
         <p className="text-lg tabular-nums text-slate-900">
@@ -65,7 +65,7 @@ export default function DevolutionsCard({
         <StatRow
           label="Taxa de devolução"
           value={taxaDev == null ? "—" : `${taxaDev}`}
-          helper={"Qtd. de devoluções divida pela qtd. de vendas"}
+          helper={"Qtd. devoluções / Qtd. de vendas"}
         />
        
       </div>
