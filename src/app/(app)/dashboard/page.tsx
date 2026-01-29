@@ -2,10 +2,36 @@ import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/serverSession";
 import { radarPool } from "@/lib/Db";
-import type { Row, ContatoRow, OpenBudgetCard } from "@/types/dashboard";
+import type { ClienteComContatos, ClienteRow, ContatoRow } from "@/types/crm";
 import DashboardClient from "@/components/dashboard/DashboardClient";
 
+type Row = {
+  cadastro_id: string | number;
+  nome_razao_social: string | null;
+  nome_fantasia: string | null;
+  nome_cidade: string | null;
+  estado_id: string | null;
+  nome_vendedor: string | null;
+  vendedor_id: string | number | null;
 
+  limite_credito_aprovado: number | null;
+  cliente_ativo: string | null;
+
+  orcamentos_abertos: number;
+  validade_orcamento_min: Date | null;
+  tem_orcamento_aberto: boolean | "t" | "f" | 1 | 0;
+  open_budget_id: number | null;
+
+  contatos_json: Array<{
+    id_contato: number;
+    id_cliente: number;
+    nome_contato: string | null;
+    funcao: string | null;
+    telefone: string | null;
+    celular: string | null;
+    criado_em: string | Date | null;
+  }>;
+};
 
 type SellerKpiRow = {
   vendedor_id: number | string;
@@ -93,19 +119,21 @@ export default async function Page() {
       ) cc
       GROUP BY cc.cadastro_id
     ),
-    open_budgets_raw AS (
+    open_budgets AS (
       SELECT
         o.cadastro_id,
-        o.orcamento_id::bigint AS orcamento_id,
-        o.data_validade_orcamento
+        COUNT(*)::int AS orcamentos_abertos,
+        MIN(o.data_validade_orcamento) AS validade_orcamento_min,
+        MAX(o.orcamento_id)::bigint AS open_budget_id
       FROM public.orcamentos o
       WHERE
         ${where}
         AND COALESCE(o.pedido_fechado,'N') = 'N'
         AND COALESCE(o.cancelado,'N') = 'N'
         AND COALESCE(o.bloqueado,'N') = 'N'
-        AND UPPER(BTRIM(o.processo_alteracao)) = 'ATUALIZAR_ORCAMENTO'
-
+        AND o.data_validade_orcamento IS NOT NULL
+        AND o.data_validade_orcamento::date >= CURRENT_DATE
+      GROUP BY o.cadastro_id
     )
     SELECT
       c.cadastro_id,
@@ -115,41 +143,35 @@ export default async function Page() {
       c.estado_id,
       c.nome_vendedor,
       c.vendedor_id,
-      c.limite_credito_aprovado,
+      c.limite_credito_aprovado,           -- ✅ necessário pro ClienteRow.Limite
       c.cliente_ativo,
 
-      ob.orcamento_id,
-      ob.data_validade_orcamento,
-
-      ${
-        session.role === "seller"
-          ? `(COALESCE(c.vendedor_id::int, -999) = $1::int) AS is_carteira`
-          : `(
-              c.vendedor_id IS NOT NULL
-              AND c.vendedor_id::int = ANY($1::int[])
-            ) AS is_carteira`
-      },
+      ob.orcamentos_abertos,
+      ob.validade_orcamento_min,
+      (ob.orcamentos_abertos > 0)::boolean AS tem_orcamento_aberto,
+      ob.open_budget_id,
 
       COALESCE(ct.contatos_json, '[]'::jsonb) AS contatos_json
-    FROM open_budgets_raw ob
+    FROM open_budgets ob
     JOIN public.vw_web_clientes c
       ON c.cadastro_id = ob.cadastro_id
     LEFT JOIN contatos ct
       ON ct.cadastro_id = ob.cadastro_id
     WHERE COALESCE(c.cliente_ativo,'S') <> 'N'
-    ORDER BY
-      ob.data_validade_orcamento ASC NULLS LAST,
-      c.cadastro_id::bigint ASC,
-      ob.orcamento_id DESC
-    LIMIT 5000;
+    ORDER BY ob.validade_orcamento_min ASC NULLS LAST, ob.orcamentos_abertos DESC
+    LIMIT 2000;
   `;
-
 
   const { rows } = await radarPool.query<Row>(sqlOpenBudgets, params);
 
-  const budgetsClients: OpenBudgetCard[] = rows.map((r) => {
+  const budgetsClients: ClienteComContatos[] = rows.map((r) => {
     const clientId = Number(r.cadastro_id);
     const sellerId = r.vendedor_id == null ? null : Number(r.vendedor_id);
+
+    const hasOpenBudget =
+      r.tem_orcamento_aberto === true ||
+      r.tem_orcamento_aberto === "t" ||
+      r.tem_orcamento_aberto === 1;
 
     const contatos: ContatoRow[] = (r.contatos_json ?? []).map((c) => ({
       id_contato: c.id_contato,
@@ -162,7 +184,9 @@ export default async function Page() {
 
     const principal = contatos.find((c) => c.telefone)?.telefone ?? null;
 
-    return {
+    // ✅ Preenche tudo que ClienteRow exige,
+    // mas mantém "campos não usados no dashboard" como null.
+    const row: ClienteRow = {
       id_cliente: clientId,
       Cliente: pickClientName(r),
       Razao_social: (r.nome_razao_social ?? "").trim(),
@@ -171,23 +195,31 @@ export default async function Page() {
       Vendedor: (r.nome_vendedor ?? "").trim(),
 
       Limite: Number(r.limite_credito_aprovado ?? 0),
+      last_sale_orcamento_id: null, // ✅ obrigatório no tipo, mas não usado aqui
 
       telefone: principal,
       tel_celular: principal,
 
+      ultima_compra: null,
+      ultima_interacao: null,
+      proxima_interacao: null,
+      observacoes: null,
+      can_undo: false,
+
       id_vendedor: sellerId,
       ativo: isActiveFlag(r.cliente_ativo),
 
-      open_budget_id: r.orcamento_id == null ? null : Number(r.orcamento_id),
-      validade_orcamento_min: r.data_validade_orcamento
-        ? new Date(r.data_validade_orcamento).toISOString()
+      orcamentos_abertos: Number(r.orcamentos_abertos ?? 0),
+      validade_orcamento_min: r.validade_orcamento_min
+        ? new Date(r.validade_orcamento_min).toISOString()
         : null,
 
-      contatos,
-      is_carteira: Boolean(r.is_carteira),
+      tem_orcamento_aberto: hasOpenBudget,
+      open_budget_id: r.open_budget_id == null ? null : Number(r.open_budget_id),
     };
-  });
 
+    return { ...row, contatos };
+  });
 
   // -----------------------------
   // (B) KPIs (mês atual)
