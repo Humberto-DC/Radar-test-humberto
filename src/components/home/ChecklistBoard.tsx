@@ -14,6 +14,7 @@ type Props = {
   onUndoContacted: (id_cliente: number) => void;
   canUndoMap: Record<number, string | null>;
   onOpenCalendar: (client: ClienteComContatos) => void;
+  nowISO: string;
 };
 
 export default function ChecklistBoard({
@@ -25,11 +26,12 @@ export default function ChecklistBoard({
   onUndoContacted,
   canUndoMap,
   onOpenCalendar,
+  nowISO,
 }: Props) {
   return (
     <div className="h-full flex flex-col min-h-0">
       <div className="shrink-0">
-        <Indicators needs={needs} contacted={contacted} budgets={budgets} ok={ok} />
+        <Indicators nowISO={nowISO} needs={needs} contacted={contacted} budgets={budgets} ok={ok} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto md:overflow-hidden">

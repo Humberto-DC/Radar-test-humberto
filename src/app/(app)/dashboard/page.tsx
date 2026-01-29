@@ -104,8 +104,8 @@ export default async function Page() {
         AND COALESCE(o.pedido_fechado,'N') = 'N'
         AND COALESCE(o.cancelado,'N') = 'N'
         AND COALESCE(o.bloqueado,'N') = 'N'
-        AND o.data_validade_orcamento IS NOT NULL
-        AND o.data_validade_orcamento::date >= CURRENT_DATE
+        AND UPPER(BTRIM(o.processo_alteracao)) = 'ATUALIZAR_ORCAMENTO'
+
     )
     SELECT
       c.cadastro_id,

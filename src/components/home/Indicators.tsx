@@ -10,6 +10,7 @@ type Props = {
   contacted: ClienteComContatos[];
   ok: ClienteComContatos[];
   budgets: ClienteComContatos[];
+  nowISO: string;
 };
 
 function isSameMonth(date: Date, reference: Date) {
@@ -104,12 +105,17 @@ function IndicatorCard({
 }
 
 
-export default function Indicators({ needs, contacted, ok, budgets }: Props) {
-  const allClients = useMemo(() => [...needs, ...contacted, ...ok, ...budgets], [needs, contacted, ok, budgets]);
+export default function Indicators({ needs, contacted, ok, budgets, nowISO }: Props) {
+  const now = useMemo(() => new Date(nowISO), [nowISO]);
+
+  const allClients = useMemo(
+    () => [...needs, ...contacted, ...ok, ...budgets],
+    [needs, contacted, ok, budgets]
+  );
+
   const totalPortfolio = allClients.length;
 
   const soldThisMonth = useMemo(() => {
-    const now = new Date();
     let count = 0;
 
     for (const client of allClients) {
@@ -118,7 +124,7 @@ export default function Indicators({ needs, contacted, ok, budgets }: Props) {
     }
 
     return count;
-  }, [allClients]);
+  }, [allClients, now]);
 
   const monthlyActivationPct = useMemo(() => {
     if (totalPortfolio === 0) return 0;
@@ -126,22 +132,32 @@ export default function Indicators({ needs, contacted, ok, budgets }: Props) {
   }, [soldThisMonth, totalPortfolio]);
 
   const clientsNeedingMessage = needs.length;
-
-  // Placeholder (when you have the real metric, replace this)
   const openBudgetsCount = budgets.length;
 
-  // ✅ 80% target
   const targetPct = 80;
-  const targetCount = useMemo(() => Math.ceil(totalPortfolio * (targetPct / 100)), [totalPortfolio]);
-  const missingToTarget = useMemo(() => Math.max(0, targetCount - soldThisMonth), [targetCount, soldThisMonth]);
+  const targetCount = useMemo(
+    () => Math.ceil(totalPortfolio * (targetPct / 100)),
+    [totalPortfolio]
+  );
 
-  const daysRemaining = useMemo(() => daysRemainingInMonthInclusive(new Date()), []);
+  const missingToTarget = useMemo(
+    () => Math.max(0, targetCount - soldThisMonth),
+    [targetCount, soldThisMonth]
+  );
+
+  // ✅ usa "now" congelado do server
+  const daysRemaining = useMemo(() => daysRemainingInMonthInclusive(now), [now]);
+
   const perDay = useMemo(() => {
     if (missingToTarget <= 0) return 0;
     return Math.ceil(missingToTarget / Math.max(1, daysRemaining));
   }, [missingToTarget, daysRemaining]);
 
-  const businessDaysRemaining = useMemo(() => businessDaysRemainingInMonthInclusive(new Date()), []);
+  const businessDaysRemaining = useMemo(
+    () => businessDaysRemainingInMonthInclusive(now),
+    [now]
+  );
+
   const perBusinessDay = useMemo(() => {
     if (missingToTarget <= 0) return 0;
     return Math.ceil(missingToTarget / Math.max(1, businessDaysRemaining));
@@ -187,7 +203,11 @@ export default function Indicators({ needs, contacted, ok, budgets }: Props) {
       <IndicatorCard
         title="Vendas por dia para 80%"
         value={missingToTarget <= 0 ? "—" : `${perBusinessDay}/dia`}
-        subtitle={missingToTarget <= 0 ? "Meta já atingida 🎉" : `${businessDaysRemaining} dias úteis restantes`}
+        subtitle={
+          missingToTarget <= 0
+            ? "Meta já atingida 🎉"
+            : `${businessDaysRemaining} dias úteis restantes`
+        }
         icon={<CalendarCheck size={15} />}
       />
     </div>

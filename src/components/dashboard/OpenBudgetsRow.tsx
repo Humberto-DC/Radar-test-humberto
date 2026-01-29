@@ -10,7 +10,7 @@ export default function OpenBudgetsRow({ clients }: { clients: OpenBudgetCard[] 
         <div>
           <h2 className="text-sm font-semibold text-[#212529]">Orçamentos abertos</h2>
           <p className="text-xs text-[#495057]">
-            Todos os orçamentos abertos do vendedor (fora/na carteira)
+            Todos os orçamentos abertos do vendedor
           </p>
         </div>
         <div className="text-xs font-semibold text-[#495057]">{clients.length}</div>
