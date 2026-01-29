@@ -106,7 +106,7 @@ export default function FeedbackModal({
                   className={[
                     "rounded-full border px-3 py-1 text-xs font-medium transition",
                     feedbackType === opt.value
-                      ? "bg-[#b6f01f] border-[#b6f01f] text-[#1a1a1a]"
+                      ? "bg-[#80ef80] border-[#80ef80] text-[#1a1a1a]"
                       : "border-slate-300 text-slate-600 hover:bg-slate-50",
                   ].join(" ")}
                 >
@@ -125,7 +125,7 @@ export default function FeedbackModal({
               onChange={(e) => setFeedbackMessage(e.target.value)}
               required
               rows={5}
-              className="w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#b6f01f] focus:border-[#b6f01f]"
+              className="w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#80ef80] focus:border-[#80ef80]"
               placeholder="Conte o que aconteceu, o que esperava, ou a ideia de melhoria..."
             />
           </div>
@@ -145,7 +145,7 @@ export default function FeedbackModal({
             <button
               type="submit"
               disabled={sending || !feedbackMessage.trim()}
-              className="rounded-md bg-[#b6f01f] px-4 py-2 text-sm font-semibold text-[#1a1a1a] disabled:cursor-not-allowed disabled:opacity-60 hover:scale-[1.02] active:scale-95 transition-transform"
+              className="rounded-md bg-[#80ef80] px-4 py-2 text-sm font-semibold text-[#1a1a1a] disabled:cursor-not-allowed disabled:opacity-60 hover:scale-[1.02] active:scale-95 transition-transform"
             >
               {sending ? "Enviando..." : "Enviar feedback"}
             </button>
