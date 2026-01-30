@@ -78,24 +78,26 @@ export type SellerKpiRow = {
   seller_id: number;
   seller_name: string | null;
 
-  // calendário
-  uteis_mes: number;
-  corridos: number;
-  restam: number;
+  // calendário (dias úteis)
+  business_days_month: number;     // uteis_mes
+  business_days_elapsed: number;   // uteis_corridos
+  business_days_remaining: number; // uteis_restantes
 
-  // vendas (nomes “novos”)
+  // vendas / devoluções (contagens)
+  total_sales_count: number;       // qtd_vendas
+  total_returns_count: number;     // qtd_devolucoes
+
+  // valores
   gross_total: number;
   freight_total: number;
   operational_expense: number;
   system_total: number;
   net_sales: number;
 
-  // devoluções / taxa
-  devolucoes: number;
-  taxa_dev: string; // "12.34%"
+  // devoluções
+  total_returns_value: number;     // total_dev_valor
+  return_rate_pct: number;         // taxa_devolucao_pct
 
-  // meta
   goal_meta: number;
-  pct_achieved: number; // número (ex: 87.65)
-  pct_ating: string;    // opcional "87.65%" se vc quiser mostrar como texto
-};
+  pct_achieved: number;
+}

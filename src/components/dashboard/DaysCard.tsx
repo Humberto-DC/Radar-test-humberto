@@ -3,9 +3,9 @@
 import React from "react";
 
 type Props = {
-  uteisMes: number; // ex: 22
-  corridos: number; // uteis já passados
-  restam: number; // uteis restantes
+  workdaysInMonth: number; // ex: 22
+  workdaysElapsed: number; // uteis já passados
+  workdaysRemaining: number; // uteis restantes
 };
 
 function StatRow({
@@ -25,7 +25,7 @@ function StatRow({
   );
 }
 
-export default function DaysCard({ uteisMes, corridos, restam }: Props) {
+export default function DaysCard({ workdaysInMonth, workdaysElapsed, workdaysRemaining }: Props) {
   return (
     <div className="flex flex-col  gap-3 rounded-2xl bg-white p-5 shadow-lg">
       <div className="flex items-center justify-between">
@@ -38,9 +38,9 @@ export default function DaysCard({ uteisMes, corridos, restam }: Props) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <StatRow label="Dias úteis do mês" value={uteisMes} />
-        <StatRow label="Dias corridos" value={corridos} />
-        <StatRow label="Dias restantes" value={restam} />
+        <StatRow label="Dias úteis do mês" value={workdaysInMonth} />
+        <StatRow label="Dias corridos" value={workdaysElapsed} />
+        <StatRow label="Dias restantes" value={workdaysRemaining} />
       </div>
     </div>
   );

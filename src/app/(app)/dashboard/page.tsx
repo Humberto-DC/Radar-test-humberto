@@ -2,21 +2,10 @@ import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/serverSession";
 import { radarPool } from "@/lib/Db";
-import type { Row, ContatoRow, OpenBudgetCard } from "@/types/dashboard";
+import type { Row, ContatoRow, OpenBudgetCard, SellerKpiRow } from "@/types/dashboard";
 import DashboardClient from "@/components/dashboard/DashboardClient";
 
-type SellerKpiRow = {
-  seller_id: number;
-  seller_name: string | null;
 
-  gross_total: number;
-  freight_total: number;
-  operational_expense: number;
-  system_total: number;
-  net_sales: number;
-  goal_meta: number;
-  pct_achieved: number;
-};
 
 function toNumber(v: unknown): number {
   if (v == null) return 0;
@@ -205,114 +194,163 @@ export default async function Page() {
   }
 
   const sqlKpisNetSales = `
-    WITH periodo AS (
-      SELECT
-        date_trunc('month', CURRENT_DATE)::date AS dt_ini,
-        (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date AS dt_fim,
-        (extract(year from date_trunc('month', CURRENT_DATE))::int * 100
-          + extract(month from date_trunc('month', CURRENT_DATE))::int) AS ano_mes
-    ),
-    vendas_consolidadas AS (
-      SELECT
-        o.vendedor_id,
-        SUM(COALESCE(o.valor_pedido, 0))::numeric AS valor_bruto_total,
-
-        SUM(
-          CASE WHEN COALESCE(o.totalmente_devolvido,'N') = 'N'
-               THEN COALESCE(o.valor_outras_desp_manual, 0)
-               ELSE 0 END
-        )::numeric AS despesa_operacional,
-
-        SUM(
-          CASE WHEN COALESCE(o.totalmente_devolvido,'N') = 'S'
-               THEN COALESCE(o.valor_outras_desp_manual, 0)
-               ELSE 0 END
-        )::numeric AS ajuste_desp_estorno,
-
-        SUM(
-          COALESCE(o.valor_frete_processado, 0) + COALESCE(o.valor_frete_extra_manual, 0)
-        )::numeric AS total_frete
-      FROM public.orcamentos o
-      CROSS JOIN periodo p
-      WHERE o.data_recebimento >= p.dt_ini
-        AND o.data_recebimento < (p.dt_fim + 1)
-        AND COALESCE(o.cancelado,'N') = 'N'
-      GROUP BY 1
-    ),
-    devolucoes_itens AS (
-      SELECT
-        rd.vendedor_id,
-        SUM(COALESCE(ird.quantidade * ird.preco_venda, 0))::numeric AS total_dev_valor
-      FROM public.itens_requisicoes_devolucoes ird
-      JOIN public.requisicoes_devolucoes rd ON ird.requisicao_id = rd.requisicao_id
-      CROSS JOIN periodo p
-      WHERE ird.data_hora_alteracao >= p.dt_ini
-        AND ird.data_hora_alteracao < (p.dt_fim + 1)
-      GROUP BY 1
-    ),
-    metas AS (
-      SELECT im.funcionario_id, SUM(im.meta)::numeric AS v_meta
-      FROM public.itens_metas im
-      CROSS JOIN periodo p
-      WHERE im.ano_mes = p.ano_mes
-      GROUP BY 1
-    )
+  WITH periodo AS (
     SELECT
-      v.vendedor_id::int AS seller_id,
-      f.nome AS seller_name,
+      date_trunc('month', CURRENT_DATE)::date AS dt_ini,
+      (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date AS dt_fim,
+      (extract(year from date_trunc('month', CURRENT_DATE))::int * 100
+        + extract(month from date_trunc('month', CURRENT_DATE))::int) AS ano_mes
+  ),
+  calendario AS (
+    SELECT
+      COUNT(*) FILTER (
+        WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5
+      )::int AS uteis_mes,
+      COUNT(*) FILTER (
+        WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5 AND d <= CURRENT_DATE
+      )::int AS uteis_corridos,
+      COUNT(*) FILTER (
+        WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5 AND d > CURRENT_DATE
+      )::int AS uteis_restantes
+    FROM periodo p
+    CROSS JOIN LATERAL generate_series(p.dt_ini, p.dt_fim, '1 day'::interval) d
+  ),
+  vendas_consolidadas AS (
+    SELECT
+      o.vendedor_id,
 
-      COALESCE(v.valor_bruto_total, 0)::numeric AS gross_total,
-      COALESCE(v.total_frete, 0)::numeric AS freight_total,
-      COALESCE(v.despesa_operacional, 0)::numeric AS operational_expense,
+      COUNT(DISTINCT o.orcamento_id)::int AS qtd_vendas,
 
-      (COALESCE(v.valor_bruto_total, 0) - COALESCE(d.total_dev_valor, 0) - COALESCE(v.ajuste_desp_estorno, 0))::numeric
-        AS system_total,
+      SUM(COALESCE(o.valor_pedido, 0))::numeric AS valor_bruto_total,
 
-      (
-        (COALESCE(v.valor_bruto_total, 0) - COALESCE(d.total_dev_valor, 0) - COALESCE(v.ajuste_desp_estorno, 0))
-        - COALESCE(v.despesa_operacional, 0)
-        - COALESCE(v.total_frete, 0)
-      )::numeric AS net_sales,
+      SUM(
+        CASE WHEN COALESCE(o.totalmente_devolvido,'N') = 'N'
+             THEN COALESCE(o.valor_outras_desp_manual, 0)
+             ELSE 0 END
+      )::numeric AS despesa_operacional,
 
-      COALESCE(m.v_meta, 0)::numeric AS goal_meta,
+      SUM(
+        CASE WHEN COALESCE(o.totalmente_devolvido,'N') = 'S'
+             THEN COALESCE(o.valor_outras_desp_manual, 0)
+             ELSE 0 END
+      )::numeric AS ajuste_desp_estorno,
 
-      CASE
-        WHEN COALESCE(m.v_meta, 0) > 0
-        THEN ROUND(
+      SUM(
+        COALESCE(o.valor_frete_processado, 0) + COALESCE(o.valor_frete_extra_manual, 0)
+      )::numeric AS total_frete
+    FROM public.orcamentos o
+    CROSS JOIN periodo p
+    WHERE o.data_recebimento >= p.dt_ini
+      AND o.data_recebimento < (p.dt_fim + 1)
+      AND COALESCE(o.cancelado,'N') = 'N'
+    GROUP BY 1
+  ),
+  devolucoes_itens AS (
+    SELECT
+      rd.vendedor_id,
+
+      COUNT(DISTINCT rd.requisicao_id)::int AS qtd_devolucoes,
+
+      SUM(COALESCE(ird.quantidade * ird.preco_venda, 0))::numeric AS total_dev_valor
+    FROM public.itens_requisicoes_devolucoes ird
+    JOIN public.requisicoes_devolucoes rd ON ird.requisicao_id = rd.requisicao_id
+    CROSS JOIN periodo p
+    WHERE ird.data_hora_alteracao >= p.dt_ini
+      AND ird.data_hora_alteracao < (p.dt_fim + 1)
+    GROUP BY 1
+  ),
+  metas AS (
+    SELECT im.funcionario_id, SUM(im.meta)::numeric AS v_meta
+    FROM public.itens_metas im
+    CROSS JOIN periodo p
+    WHERE im.ano_mes = p.ano_mes
+    GROUP BY 1
+  )
+  SELECT
+    v.vendedor_id::int AS seller_id,
+    f.nome AS seller_name,
+
+    c.uteis_mes,
+    c.uteis_corridos,
+    c.uteis_restantes,
+
+    COALESCE(v.qtd_vendas, 0)::int AS qtd_vendas,
+    COALESCE(d.qtd_devolucoes, 0)::int AS qtd_devolucoes,
+
+    COALESCE(v.valor_bruto_total, 0)::numeric AS gross_total,
+    COALESCE(v.total_frete, 0)::numeric AS freight_total,
+    COALESCE(v.despesa_operacional, 0)::numeric AS operational_expense,
+
+    (COALESCE(v.valor_bruto_total, 0) - COALESCE(d.total_dev_valor, 0) - COALESCE(v.ajuste_desp_estorno, 0))::numeric
+      AS system_total,
+
+    (
+      (COALESCE(v.valor_bruto_total, 0) - COALESCE(d.total_dev_valor, 0) - COALESCE(v.ajuste_desp_estorno, 0))
+      - COALESCE(v.despesa_operacional, 0)
+      - COALESCE(v.total_frete, 0)
+    )::numeric AS net_sales,
+
+    COALESCE(d.total_dev_valor, 0)::numeric AS total_dev_valor,
+
+    CASE
+      WHEN COALESCE(v.valor_bruto_total, 0) > 0
+      THEN ROUND((COALESCE(d.total_dev_valor, 0) / v.valor_bruto_total * 100)::numeric, 2)
+      ELSE 0
+    END AS taxa_devolucao_pct,
+
+    COALESCE(m.v_meta, 0)::numeric AS goal_meta,
+
+    CASE
+      WHEN COALESCE(m.v_meta, 0) > 0
+      THEN ROUND(
+        (
           (
-            (
-              (COALESCE(v.valor_bruto_total, 0) - COALESCE(d.total_dev_valor, 0) - COALESCE(v.ajuste_desp_estorno, 0))
-              - COALESCE(v.despesa_operacional, 0)
-              - COALESCE(v.total_frete, 0)
-            ) / m.v_meta * 100
-          )::numeric
-        , 2)
-        ELSE 0
-      END AS pct_achieved
+            (COALESCE(v.valor_bruto_total, 0) - COALESCE(d.total_dev_valor, 0) - COALESCE(v.ajuste_desp_estorno, 0))
+            - COALESCE(v.despesa_operacional, 0)
+            - COALESCE(v.total_frete, 0)
+          ) / m.v_meta * 100
+        )::numeric
+      , 2)
+      ELSE 0
+    END AS pct_achieved
 
-    FROM vendas_consolidadas v
-    LEFT JOIN devolucoes_itens d ON v.vendedor_id = d.vendedor_id
-    LEFT JOIN metas m ON v.vendedor_id = m.funcionario_id
-    LEFT JOIN public.funcionarios f ON v.vendedor_id = f.funcionario_id
-    WHERE ${kpiWhere}
-      AND COALESCE(v.valor_bruto_total, 0) > 0
-    ORDER BY net_sales DESC;
-  `;
+  FROM vendas_consolidadas v
+  CROSS JOIN calendario c
+  LEFT JOIN devolucoes_itens d ON v.vendedor_id = d.vendedor_id
+  LEFT JOIN metas m ON v.vendedor_id = m.funcionario_id
+  LEFT JOIN public.funcionarios f ON v.vendedor_id = f.funcionario_id
+  WHERE ${kpiWhere}
+    AND COALESCE(v.valor_bruto_total, 0) > 0
+  ORDER BY net_sales DESC;
+`;
+
 
   const { rows: kpiRowsRaw } = await radarPool.query(sqlKpisNetSales, kpiArgs);
 
-  const sellerKpis: SellerKpiRow[] = (kpiRowsRaw as any[]).map((r) => ({
-    seller_id: Number(r.seller_id),
-    seller_name: r.seller_name ?? null,
+ const sellerKpis: SellerKpiRow[] = (kpiRowsRaw as any[]).map((r) => ({
+  seller_id: Number(r.seller_id),
+  seller_name: r.seller_name ?? null,
 
-    gross_total: toNumber(r.gross_total),
-    freight_total: toNumber(r.freight_total),
-    operational_expense: toNumber(r.operational_expense),
-    system_total: toNumber(r.system_total),
-    net_sales: toNumber(r.net_sales),
-    goal_meta: toNumber(r.goal_meta),
-    pct_achieved: toNumber(r.pct_achieved),
-  }));
+  business_days_month: Number(r.uteis_mes ?? 0),
+  business_days_elapsed: Number(r.uteis_corridos ?? 0),
+  business_days_remaining: Number(r.uteis_restantes ?? 0),
+
+  total_sales_count: Number(r.qtd_vendas ?? 0),
+  total_returns_count: Number(r.qtd_devolucoes ?? 0),
+
+  gross_total: toNumber(r.gross_total),
+  freight_total: toNumber(r.freight_total),
+  operational_expense: toNumber(r.operational_expense),
+  system_total: toNumber(r.system_total),
+  net_sales: toNumber(r.net_sales),
+
+  total_returns_value: toNumber(r.total_dev_valor),
+  return_rate_pct: toNumber(r.taxa_devolucao_pct),
+
+  goal_meta: toNumber(r.goal_meta),
+  pct_achieved: toNumber(r.pct_achieved),
+}));
+
 
   return (
     <DashboardClient

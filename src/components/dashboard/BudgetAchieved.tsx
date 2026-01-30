@@ -5,11 +5,10 @@ import React, { useMemo } from "react";
 type Props = {
   value: number;
   target: number;
+  numSales: number;
   label?: string;
   currency?: "BRL" | "NONE";
   decimals?: number;
-
-  maxPct?: number; // ✅ limite visual do gauge (ex: 2 = 200%)
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -30,14 +29,16 @@ function formatCompactBRL(v: number) {
 export default function BudgetAchieved({
   value,
   target,
+  numSales,
   label = "da meta",
   currency = "BRL",
   decimals = 2,
-  maxPct = 1,
 }: Props) {
-  const rawPct = target > 0 ? value / target : 0;      // ✅ pode ser 1.5 (150%)
-  const pctForGauge = clamp(rawPct, 0, maxPct);        // ✅ limita só o visual
-  const pctText = `${Math.round(rawPct * 100)}% ${label}`;
+  const rawPct = target > 0 ? value / target : 0;
+
+  // ✅ trava em 0..100% (visual e texto)
+  const pct = clamp(rawPct, 0, 1);
+  const pctText = `${(pct * 100).toFixed(decimals)}% ${label}`;
 
   const W = 240;
   const H = 140;
@@ -53,7 +54,7 @@ export default function BudgetAchieved({
   const basePath = `M ${startX} ${startY} A ${r} ${r} 0 0 1 ${endX} ${endY}`;
 
   const arcLen = Math.PI * r;
-  const dash = arcLen * (pctForGauge / maxPct); // ✅ “enche” até maxPct
+  const dash = arcLen * pct;        // ✅ só até 100%
   const gap = arcLen - dash;
 
   const valueText = useMemo(() => {
@@ -68,7 +69,7 @@ export default function BudgetAchieved({
     <div className="flex flex-col justify-between gap-6">
       <div className="w-full h-full rounded-2xl bg-white border border-gray-100 shadow-lg">
         <div className="text-sm font-semibold text-[#212529] gap-2 px-6 mt-6">
-          Atingido
+          Atingido {numSales}
         </div>
 
         <div className="flex items-center justify-center py-6">

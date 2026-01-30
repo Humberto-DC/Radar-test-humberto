@@ -1,25 +1,12 @@
 "use client";
 
-import type { OpenBudgetCard } from "@/types/dashboard";
+import type { OpenBudgetCard, SellerKpiRow } from "@/types/dashboard";
 import OpenBudgetsRow from "./OpenBudgetsRow";
 import BudgetAchieved from "./BudgetAchieved";
 import DailyGoalCard from "./GoalsCard";
 import DaysCard from "./DaysCard";
 import DevolutionsCard from "./DevolutionCard";
 
-type SellerKpiRow = {
-  seller_id: number;
-  seller_name: string | null;
-
-  gross_total: number;
-  freight_total: number;
-  operational_expense: number;
-  system_total: number;
-
-  net_sales: number;
-  goal_meta: number;
-  pct_achieved: number;
-};
 
 export default function DashboardClient({
   openBudgetClients,
@@ -41,24 +28,26 @@ export default function DashboardClient({
               <BudgetAchieved
                 value={kpi.net_sales}
                 target={kpi.goal_meta}
-                label="da meta"
-                maxPct={2}
+                numSales={kpi.total_sales_count}
               />
 
               <DailyGoalCard
                 netSales={kpi.net_sales}
                 goal={kpi.goal_meta}
-                workdaysInMonth={0}
-                workdaysElapsed={0}
-                workdaysRemaining={0}
+                workdaysInMonth={kpi.business_days_month}
+                workdaysElapsed={kpi.business_days_elapsed}
+                workdaysRemaining={kpi.business_days_remaining}
               />
 
-              <DaysCard uteisMes={0} corridos={0} restam={0} />
+              <DaysCard                 
+                workdaysInMonth={kpi.business_days_month}
+                workdaysElapsed={kpi.business_days_elapsed}
+                workdaysRemaining={kpi.business_days_remaining} />
 
               <DevolutionsCard
-                devolucoes={0}
-                taxaDev={null}
-                faturamentoBruto={kpi.gross_total}
+                devolucoes={kpi.total_returns_value}
+                taxaDev={kpi.return_rate_pct}
+                devolutionCount={kpi.total_returns_count}
               />
             </div>
           )}
