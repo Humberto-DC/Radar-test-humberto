@@ -1,7 +1,5 @@
 "use client";
 
-import React, { useMemo } from "react";
-
 type Props = {
   devolucoes: number;              // R$
   taxaDev?: number | null;         // ex "2.1" ou "2,1" ou "2.1%" ou null
@@ -14,13 +12,6 @@ function formatBRL(v: number) {
     currency: "BRL",
     maximumFractionDigits: 2,
   }).format(Number.isFinite(v) ? v : 0);
-}
-
-function parsePercentLoose(v?: string | null) {
-  if (!v) return null;
-  const s = String(v).trim().replace("%", "");
-  const n = Number(s.replace(/\./g, "").replace(",", "."));
-  return Number.isFinite(n) ? n : null; // retorna "2.1" como 2.1 (em %)
 }
 
 function StatRow({

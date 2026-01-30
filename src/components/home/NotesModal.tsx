@@ -1,7 +1,7 @@
 // components/home/NotesModal.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   open: boolean;

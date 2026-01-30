@@ -2,7 +2,7 @@
 
 import {useEffect, useMemo, useState } from "react";
 import type { ClienteComContatos } from "@/types/crm";
-import { parseLooseDate, daysSince, formatLocalShort, formatLocalVeryShort } from "@/lib/dates";
+import { parseLooseDate, daysSince, formatLocalVeryShort } from "@/lib/dates";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 import { getCardStatus, type BoardColumn } from "@/lib/checklistRules";
 import { SquareCheckBig, AlarmClockOff, NotebookPen } from "lucide-react";

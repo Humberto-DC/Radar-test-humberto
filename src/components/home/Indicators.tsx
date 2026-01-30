@@ -146,12 +146,6 @@ export default function Indicators({ needs, contacted, ok, budgets, nowISO }: Pr
   );
 
   // ✅ usa "now" congelado do server
-  const daysRemaining = useMemo(() => daysRemainingInMonthInclusive(now), [now]);
-
-  const perDay = useMemo(() => {
-    if (missingToTarget <= 0) return 0;
-    return Math.ceil(missingToTarget / Math.max(1, daysRemaining));
-  }, [missingToTarget, daysRemaining]);
 
   const businessDaysRemaining = useMemo(
     () => businessDaysRemainingInMonthInclusive(now),

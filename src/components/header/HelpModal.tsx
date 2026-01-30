@@ -29,18 +29,19 @@ function clamp(n: number, min: number, max: number) {
 }
 
 export default function HelpModal({ open, onClose, sellerName }: Props) {
-  if (!open) return null;
-
-  const supportHref = buildWhatsAppSupportLink(
-    "5561996246646",
-    `Oi! Sou ${sellerName ?? "usuário"} e preciso de ajuda no painel de reativação de clientes.`
-  );
-
+  // ✅ Hooks SEMPRE no topo (nada de return antes)
   const slidesRef = useRef<HTMLDivElement | null>(null);
   const programmaticRef = useRef(false);
   const programmaticTimer = useRef<number | null>(null);
 
   const [page, setPage] = useState(0);
+
+  const supportHref = useMemo(() => {
+    return buildWhatsAppSupportLink(
+      "5561996246646",
+      `Oi! Sou ${sellerName ?? "usuário"} e preciso de ajuda no painel de reativação de clientes.`
+    );
+  }, [sellerName]);
 
   const slides = useMemo(
     () => [
@@ -50,7 +51,6 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
         icon: <Info className="text-slate-700" size={18} />,
         body: (
           <div className="mt-2 grid gap-3 md:grid-cols-2">
-            {/* Colunas */}
             <div className="rounded-lg bg-slate-50 p-3">
               <p className="text-sm font-semibold text-slate-800">Colunas</p>
               <ul className="mt-2 space-y-1 text-sm text-slate-600">
@@ -69,25 +69,32 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
               </ul>
             </div>
 
-            {/* Cores */}
             <div className="rounded-lg bg-slate-50 p-3">
               <div className="flex items-center gap-2">
                 <SwatchBook className="text-slate-700" size={16} />
-                <p className="text-sm font-semibold text-slate-800">Cores = prioridade</p>
+                <p className="text-sm font-semibold text-slate-800">
+                  Cores = prioridade
+                </p>
               </div>
 
               <div className="mt-2 grid gap-2 sm:grid-cols-3 md:grid-cols-1">
                 <div className="rounded-lg bg-white p-3">
                   <p className="text-sm font-semibold text-red-500">Vermelho</p>
-                  <p className="mt-1 text-sm text-slate-600">Urgente / + de 30 dias que o cliente não compra.</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Urgente / + de 30 dias que o cliente não compra.
+                  </p>
                 </div>
                 <div className="rounded-lg bg-white p-3">
                   <p className="text-sm font-semibold text-amber-500">Amarelo</p>
-                  <p className="mt-1 text-sm text-slate-600">Atenção / + de 7 dias que ele não compra.</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Atenção / + de 7 dias que ele não compra.
+                  </p>
                 </div>
                 <div className="rounded-lg bg-white p-3">
                   <p className="text-sm font-semibold text-green-600">Verde</p>
-                  <p className="mt-1 text-sm text-slate-600">Tudo ok / recente.</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Tudo ok / recente.
+                  </p>
                 </div>
               </div>
             </div>
@@ -112,7 +119,7 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
                 <CalendarClock size={16} /> Reagendar quando pedir prazo
               </p>
               <p className="mt-1">
-                clinete pediu “Fale comigo em X dias”? agende o <b>Próx. contato</b> no calendário.
+                cliente pediu “Fale comigo em X dias”? agende o <b>Próx. contato</b> no calendário.
               </p>
             </div>
 
@@ -139,15 +146,10 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
     const child = el.children.item(idx) as HTMLElement | null;
     if (!child) return;
 
-    // marca como scroll "programático" pra não ficar brigando com o listener
     programmaticRef.current = true;
     if (programmaticTimer.current) window.clearTimeout(programmaticTimer.current);
 
-    el.scrollTo({
-      left: child.offsetLeft,
-      behavior: "smooth",
-    });
-
+    el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
     setPage(idx);
 
     programmaticTimer.current = window.setTimeout(() => {
@@ -155,7 +157,10 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
     }, 350);
   };
 
+  // ✅ só instala o listener quando open = true
   useEffect(() => {
+    if (!open) return;
+
     const el = slidesRef.current;
     if (!el) return;
 
@@ -183,7 +188,18 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
 
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [open]);
+
+  // ✅ ao abrir, reseta página e scroll pro início
+  useEffect(() => {
+    if (!open) return;
+    setPage(0);
+    const el = slidesRef.current;
+    if (el) el.scrollTo({ left: 0, behavior: "auto" });
+  }, [open]);
+
+  // ✅ agora sim: render condicional depois dos hooks
+  if (!open) return null;
 
   return (
     <div
@@ -196,7 +212,6 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
       }}
     >
       <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-lg">
-        {/* Header */}
         <div className="mb-3 flex items-start justify-between gap-4">
           <h2 className="text-lg font-semibold text-slate-800">Ajuda rápida</h2>
 
@@ -209,7 +224,6 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
           </button>
         </div>
 
-        {/* Controls */}
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <span className="rounded-full bg-slate-100 px-2 py-1">
@@ -218,14 +232,11 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
           </div>
         </div>
 
-        {/* Slides (sem scrollbar) */}
         <div
           ref={slidesRef}
           className={[
             "flex gap-3 overflow-x-auto",
             "snap-x snap-mandatory scroll-smooth light-scrollbar",
-          
- 
           ].join(" ")}
           style={{ WebkitOverflowScrolling: "touch" }}
         >
@@ -235,7 +246,6 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
               className={[
                 "snap-start min-w-full",
                 "rounded-xl border border-slate-200 p-4",
-                // altura fixa pra caber e não precisar scroll interno
                 "min-h-80 md:min-h-85",
               ].join(" ")}
             >
@@ -248,7 +258,6 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
           ))}
         </div>
 
-        {/* Dots */}
         <div className="my-3 flex items-center justify-center gap-2">
           {slides.map((s, idx) => (
             <button
@@ -264,11 +273,12 @@ export default function HelpModal({ open, onClose, sellerName }: Props) {
           ))}
         </div>
 
-        {/* Suporte */}
         <div className="rounded-xl bg-slate-50 p-4">
           <div className="flex items-center gap-2">
             <MessageCircle className="text-slate-700" size={18} />
-            <p className="text-sm font-semibold text-slate-800">Precisa de ajuda? chama o suporte</p>
+            <p className="text-sm font-semibold text-slate-800">
+              Precisa de ajuda? chama o suporte
+            </p>
           </div>
 
           <div className="mt-3 flex flex-wrap justify-end gap-3">
