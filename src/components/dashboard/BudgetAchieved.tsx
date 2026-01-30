@@ -69,7 +69,10 @@ export default function BudgetAchieved({
     <div className="flex flex-col justify-between gap-6">
       <div className="w-full h-full rounded-2xl bg-white border border-gray-100 shadow-lg">
         <div className="text-sm font-semibold text-[#212529] gap-2 px-6 mt-6">
-          Atingido {numSales}
+          Atingido 
+        </div>
+        <div className="text-sm font-light text-[#212529] gap-2 px-6">
+          N° de vendas: {numSales}
         </div>
 
         <div className="flex items-center justify-center py-6">
