@@ -65,7 +65,7 @@ export default function DevolutionsCard({
         <StatRow
           label="Taxa de devolução"
           value={taxaDev == null ? "—" : `${taxaDev}%`}
-          helper={"Qtd. devoluções / Qtd. de vendas"}
+          helper={"Devoluções / Vendas"}
         />
         <StatRow     
           label="N° de devoluções"
