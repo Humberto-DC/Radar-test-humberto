@@ -4,15 +4,15 @@ import React, { useMemo } from "react";
 
 type Props = {
   devolucoes: number;              // R$
-  taxaDev?: string | null;         // ex "2.1" ou "2,1" ou "2.1%" ou null
-  faturamentoBruto?: number;       // opcional (pra recalcular taxa se vier ruim)
+  taxaDev?: number | null;         // ex "2.1" ou "2,1" ou "2.1%" ou null
+  devolutionCount?: number;       // opcional (pra recalcular taxa se vier ruim)
 };
 
 function formatBRL(v: number) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(Number.isFinite(v) ? v : 0);
 }
 
@@ -50,7 +50,7 @@ function StatRow({
 export default function DevolutionsCard({
   devolucoes,
   taxaDev,
-  faturamentoBruto,
+  devolutionCount,
 }: Props) {
 
 
@@ -64,8 +64,13 @@ export default function DevolutionsCard({
         <StatRow label="Total devolvido" value={formatBRL(devolucoes)} />
         <StatRow
           label="Taxa de devolução"
-          value={taxaDev == null ? "—" : `${taxaDev}`}
+          value={taxaDev == null ? "—" : `${taxaDev}%`}
           helper={"Qtd. devoluções / Qtd. de vendas"}
+        />
+        <StatRow     
+          label="N° de devoluções"
+          value={devolutionCount == null ? "—" : `${devolutionCount}`}
+          helper={"Vendas devolvidas"}
         />
        
       </div>

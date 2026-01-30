@@ -23,6 +23,7 @@ export default function Header({ sellerName }: { sellerName?: string }) {
             className="shrink-0 ring-2 ring-white/20"
             fallback={<CircleUserRound size={24} strokeWidth={1} className="text-white" />}
           />
+          <div className="text-sm font-semibold text-white/80 hidden sm:block">Olá, {sellerName}</div>
         </div>
 
         {/* Centro (somente desktop) */}
