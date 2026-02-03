@@ -6,7 +6,7 @@ import ChecklistBoard from "./ChecklistBoard";
 import CalendarModal from "./CalendarModal";
 import { getBoardColumn, sortByUrgency } from "@/lib/checklistRules";
 
-type Props = { 
+type Props = {
   clients: ClienteComContatos[];
   nowISO: string;
 };
@@ -15,7 +15,7 @@ function addDaysISO(days: number) {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export default function HomeClient({ clients , nowISO}: Props) {
+export default function HomeClient({ clients, nowISO }: Props) {
   const [localClients, setLocalClients] = useState(clients);
 
   // ✅ Calendar modal state
@@ -78,9 +78,13 @@ export default function HomeClient({ clients , nowISO}: Props) {
   }, [localClients]);
 
   async function markContacted(clientId: number) {
+    const originalClient = localClients.find((c) => c.id_cliente === clientId);
+    if (!originalClient) return;
+
     const nowIso = new Date().toISOString();
     const nextIso = addDaysISO(7);
 
+    // Optimistic Update
     setLocalClients((prev) =>
       prev.map((c) =>
         c.id_cliente === clientId
@@ -115,17 +119,9 @@ export default function HomeClient({ clients , nowISO}: Props) {
         )
       );
     } catch {
+      // Rollback to EXACT original state
       setLocalClients((prev) =>
-        prev.map((c) =>
-          c.id_cliente === clientId
-            ? {
-                ...c,
-                ultima_interacao: null,
-                proxima_interacao: new Date().toISOString(),
-                can_undo: false,
-              }
-            : c
-        )
+        prev.map((c) => (c.id_cliente === clientId ? originalClient : c))
       );
       alert("Não foi possível marcar como feito.");
     }
@@ -176,17 +172,13 @@ export default function HomeClient({ clients , nowISO}: Props) {
     }
   }
 
-useEffect(() => {
-  const openBudget = localClients.filter((c) => c.tem_orcamento_aberto);
-  const inBudgetColumn = localClients.filter((c) => getBoardColumn(c) === "budget_open");
-  const openBudgetButOk = localClients.filter(
-    (c) => c.tem_orcamento_aberto && getBoardColumn(c) === "ok"
-  );
-
-  console.log("openBudget (has_open_budget):", openBudget.map(c => c.id_cliente));
-  console.log("budget_open column:", inBudgetColumn.map(c => c.id_cliente));
-  console.log("openBudget but OK (bought <=7d):", openBudgetButOk.map(c => c.id_cliente));
-}, [localClients]);
+  useEffect(() => {
+    const openBudget = localClients.filter((c) => c.tem_orcamento_aberto);
+    const inBudgetColumn = localClients.filter((c) => getBoardColumn(c) === "budget_open");
+    const openBudgetButOk = localClients.filter(
+      (c) => c.tem_orcamento_aberto && getBoardColumn(c) === "ok"
+    );
+  }, [localClients]);
 
 
 

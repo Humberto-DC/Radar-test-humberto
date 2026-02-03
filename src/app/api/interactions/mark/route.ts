@@ -1,3 +1,4 @@
+// src/app/api/interactions/mark/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/serverSession";
 import { radarPool } from "@/lib/Db";
@@ -33,16 +34,35 @@ export async function POST(req: Request) {
   }
 
   // regra: marcou como feito -> ultima_interacao agora + proximo contato em 7 dias
-  const sql = `
-    INSERT INTO public.crm_interacoes_radar (cliente_id, ultima_interacao, proxima_interacao, observacoes)
-    VALUES ($1, NOW(), NOW() + INTERVAL '7 days', NULL)
-    ON CONFLICT (cliente_id) DO UPDATE
-    SET
-      ultima_interacao  = NOW(),
-      proxima_interacao = NOW() + INTERVAL '7 days'
-    RETURNING cliente_id, ultima_interacao, proxima_interacao, observacoes;
-  `;
+  try {
+    // 1. Tenta atualizar se já existe
+    const updateSql = `
+      UPDATE public.crm_interacoes_radar
+      SET
+        ultima_interacao = NOW(),
+        proxima_interacao = NOW() + INTERVAL '7 days',
+        observacoes = NULL
+      WHERE cliente_id = $1
+      RETURNING cliente_id, ultima_interacao, proxima_interacao, observacoes;
+    `;
+    const { rows: updateRows } = await radarPool.query(updateSql, [id_cliente]);
 
-  const { rows } = await radarPool.query(sql, [id_cliente]);
-  return NextResponse.json({ ok: true, data: rows[0] });
+    if (updateRows.length > 0) {
+      return NextResponse.json({ ok: true, data: updateRows[0] });
+    }
+
+    // 2. Se não atualizou, insere (cliente novo no radar)
+    const insertSql = `
+      INSERT INTO public.crm_interacoes_radar (cliente_id, ultima_interacao, proxima_interacao, observacoes)
+      VALUES ($1, NOW(), NOW() + INTERVAL '7 days', NULL)
+      RETURNING cliente_id, ultima_interacao, proxima_interacao, observacoes;
+    `;
+    const { rows: insertRows } = await radarPool.query(insertSql, [id_cliente]);
+
+    return NextResponse.json({ ok: true, data: insertRows[0] });
+
+  } catch (error) {
+    console.error("Error in mark/route.ts:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
