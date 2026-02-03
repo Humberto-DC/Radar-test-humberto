@@ -64,7 +64,7 @@ export default function WeekGoalCard({
   const hit = weekly_meta > 0 && weekly_realized >= weekly_meta;
 
   return (
-    <div className="w-full max-w-sm rounded-2xl bg-white p-4 shadow-lg border border-gray-100">
+    <div className="w-full rounded-2xl bg-white p-4 shadow-lg border border-gray-100">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-slate-900">Meta da semana</h3>

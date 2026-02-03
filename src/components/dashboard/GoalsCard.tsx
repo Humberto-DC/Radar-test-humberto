@@ -58,24 +58,24 @@ export default function DailyGoalCard({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-1 grid-cols-2 sm:grid-cols-2">
-        <div className="rounded-xl border border-gray-200 p-3">
-          <div className="text-xs text-[#6c757d]">Meta</div>
+      <div className="mt-4 grid gap-1 grid-cols">
+        <div className=" flex justify-between rounded-xl border border-gray-200 p-3">
+          <div className="text-[#6c757d]">Meta</div>
           <div className="text-base font-semibold text-[#212529]">{formatBRL(safeGoal)}</div>
         </div>
 
-        <div className="rounded-xl border border-gray-200 p-3">
-          <div className="text-xs text-[#6c757d]">Vendido (líquido)</div>
+        <div className="flex justify-between rounded-xl border border-gray-200 p-3">
+          <div className=" text-[#6c757d]">Vendido</div>
           <div className="text-base font-semibold text-[#212529]">{formatBRL(safeNetSales)}</div>
         </div>
 
-        <div className="rounded-xl border border-gray-200 p-3">
-          <div className="text-xs text-[#6c757d]">Falta</div>
+        <div className="flex justify-between rounded-xl border border-gray-200 p-3">
+          <div className=" text-[#6c757d]">Falta</div>
           <div className="text-base font-semibold text-[#212529]">{formatBRL(remainingGoal)}</div>
         </div>
 
-        <div className="rounded-xl border border-gray-200 p-3">
-          <div className="text-xs text-[#6c757d]">Vendas / dia</div>
+        <div className="flex justify-between rounded-xl border border-gray-200 p-3">
+          <div className="text-[#6c757d]">Vendas / dia</div>
           <div className="text-base font-semibold text-[#212529]">{formatBRL(perDay)}</div>
         </div>
       </div>

@@ -25,7 +25,7 @@ export default function DashboardClient({
           {!kpi ? (
             <p className="text-sm text-[#495057]">Sem dados de vendas no mês atual.</p>
           ) : (
-            <div className="mt-4 grid gap-3 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-5 ">
+            <div className="mt-4 grid gap-3 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-5 ">
               <BudgetAchieved
                 value={kpi.net_sales}
                 target={kpi.goal_meta}
