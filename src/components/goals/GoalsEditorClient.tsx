@@ -36,6 +36,8 @@ export default function GoalsEditorClient({
   const [query, setQuery] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  const goal = 1000
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows;

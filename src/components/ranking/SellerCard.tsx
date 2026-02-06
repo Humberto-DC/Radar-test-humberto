@@ -4,7 +4,7 @@ import React from "react";
 import type { RankingSellerRow } from "@/app/(app)/ranking/page";
 import { formatBRL }from  "@/components/utils"
 import  StatGroup  from "./StatGroup"
-
+import WalletStatGroup from "./WalletStatGroup";
 function Badge({
   children,
   tone = "neutral",
@@ -59,6 +59,7 @@ const monthBadge =
     : monthlyPct >= 100
     ? { text: "Mês 100% ✓" }
     : null;
+
   return (
     <div className="group rounded-2xl bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow border border-slate-100">
       {/* ⬇️ menos espaço e melhor alinhamento */}
@@ -103,7 +104,7 @@ const monthBadge =
         </div>
 
         {/* METAS */}
-        <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           <StatGroup
             label="Semana Atual"
             meta={row.weekly_meta}
@@ -124,6 +125,15 @@ const monthBadge =
               hit={monthlyHit}
             />
           </div>
+          <WalletStatGroup
+            label="Positivação"
+            pct={row.wallet_positive_pct}
+            total={row.wallet_total}
+            positiveMonth={row.wallet_positive_month}
+            needMessage={row.need_message}
+            followUp={row.follow_up}
+            openBudgets={row.open_budgets}
+          />
         </div>
       </div>
     </div>

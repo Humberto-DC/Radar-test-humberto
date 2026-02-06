@@ -64,12 +64,11 @@ export default function SellerGoalCard({
         </div>
 
         <div className="text-xs text-gray-600 sm:text-right">
-          <div>Semanal: <span className="font-semibold text-[#212529]">{formatBRL(row.weekly_meta)}</span></div>
           <div>Mensal: <span className="font-semibold text-[#212529]">{formatBRL(row.monthly_meta)}</span></div>
         </div>
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <div className=" mt-3 grid gap-3 sm:grid-cols-2">
         <div>
           <div className="mb-1 text-xs font-semibold text-gray-700">Meta semanal (R$)</div>
           <InputMoney
@@ -82,11 +81,7 @@ export default function SellerGoalCard({
 
         <div>
           <div className="mb-1 text-xs font-semibold text-gray-700">Meta mensal (R$)</div>
-          <InputMoney
-            value={row.monthly_meta}
-            onChange={(n) => onChange({ monthly_meta: n })}
-            placeholder="Ex: 120000"
-          />
+          <div>1000</div>
           {!monthlyOk && <div className="mt-1 text-[11px] text-red-600">Valor inválido.</div>}
         </div>
       </div>

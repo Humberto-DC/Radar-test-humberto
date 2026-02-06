@@ -45,7 +45,6 @@ export default function RankingClient({
   }, [sellers]);
 
 
-
   return (
     <div className="w-full">
       <div className="rounded-2xl bg-white border border-gray-100 shadow-lg">

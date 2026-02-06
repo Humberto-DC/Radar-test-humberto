@@ -20,8 +20,11 @@ export default function StatGroup({
   bonus?: number;
 }) {
   const safePct = Number.isFinite(pct) ? pct : 0;
+  const MissingSuperGoal = (meta * 1.1) - realized;
   const barPct = Math.min(Math.max(safePct, 0), 100);
+  const isMonth = label === "Mês Atual"
 
+  
   const shouldShowBonus100 =
     safePct >= 100 && Number.isFinite(bonus) && bonus > 0;
   
@@ -29,7 +32,7 @@ export default function StatGroup({
 
   return (
     <div className="flex-1 min-w-50 h-full">
-      <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col px-15 2xl:px-25">
+      <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col px-5 2xl:px-3">
         <div className="min-h-14 flex items-end justify-between mb-2">
           <div className="min-w-0">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
@@ -71,9 +74,14 @@ export default function StatGroup({
                 Bonificação {formatBRL(bonus)}
               </span>
             ) : shouldShowMissing ? (
-              <span className="text-[11px] font-semibold text-amber-400 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded whitespace-nowrap">
-                Falta {formatBRL(missing)}
-              </span>
+              <div className="flex gap-3">
+                <span className="text-[11px] font-semibold text-amber-400 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded whitespace-nowrap">
+                  {formatBRL(missing)} p/100%
+                </span>
+                {isMonth && <span className="text-[11px] font-semibold text-amber-400 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded whitespace-nowrap">
+                  {formatBRL(MissingSuperGoal)} p/110%
+                </span>}
+              </div>
             ) : (
               <span className="invisible text-[11px] px-1.5 py-0.5 rounded">
                 placeholder
