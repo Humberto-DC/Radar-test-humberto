@@ -5,6 +5,10 @@ import RankingClient from "@/components/ranking/RankingClient";
 import { getServerSession } from "@/lib/serverSession";
 import { radarPool } from "@/lib/Db";
 
+function fmtMonthBR(date: Date) {
+  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(date);
+}
+
 function toNumber(v: unknown): number {
   if (v == null) return 0;
   if (typeof v === "number") return v;
@@ -528,11 +532,13 @@ SELECT
 
 
   const weekLabel = `${fmtBRShort(monday)} — ${fmtBRShort(friday)}`;
+  const monthLabel = fmtMonthBR(monday); 
 
   return (
     <RankingClient
       weekOffset={weekOffset}
       weekLabel={weekLabel}
+      monthLabel={monthLabel}
       totalMonthGoal={totalMonthGoal}
       totalMonthSold={totalMonthSold}
       totalMonthPct={totalMonthPct}

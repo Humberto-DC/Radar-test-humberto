@@ -190,14 +190,43 @@ export default async function Page() {
         (extract(year from date_trunc('month', CURRENT_DATE))::int * 100
           + extract(month from date_trunc('month', CURRENT_DATE))::int) AS ano_mes
     ),
-    calendario AS (
-      SELECT
-        COUNT(*) FILTER (WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5)::int AS uteis_mes,
-        COUNT(*) FILTER (WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5 AND d <= CURRENT_DATE)::int AS uteis_corridos,
-        COUNT(*) FILTER (WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5 AND d > CURRENT_DATE)::int AS uteis_restantes
-      FROM periodo p
-      CROSS JOIN LATERAL generate_series(p.dt_ini, p.dt_fim, '1 day'::interval) d
-    ),
+feriados_periodo AS (
+  SELECT feriado_id::date AS dt_feriado
+  FROM public.feriados
+  CROSS JOIN periodo p
+  WHERE feriado_id::date BETWEEN p.dt_ini AND p.dt_fim
+),
+  calendario AS (
+    SELECT
+      COUNT(*) FILTER (
+        WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5
+          AND NOT EXISTS (
+            SELECT 1 FROM feriados_periodo fp
+            WHERE fp.dt_feriado = d::date
+          )
+      )::int AS uteis_mes,
+
+      COUNT(*) FILTER (
+        WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5
+          AND d <= CURRENT_DATE
+          AND NOT EXISTS (
+            SELECT 1 FROM feriados_periodo fp
+            WHERE fp.dt_feriado = d::date
+          )
+      )::int AS uteis_corridos,
+
+      COUNT(*) FILTER (
+        WHERE EXTRACT(DOW FROM d) BETWEEN 1 AND 5
+          AND d > CURRENT_DATE
+          AND NOT EXISTS (
+            SELECT 1 FROM feriados_periodo fp
+            WHERE fp.dt_feriado = d::date
+          )
+      )::int AS uteis_restantes
+    FROM periodo p
+    CROSS JOIN LATERAL generate_series(p.dt_ini, p.dt_fim, '1 day'::interval) d
+  ),
+
     vendas_consolidadas AS (
       SELECT
         o.vendedor_id,

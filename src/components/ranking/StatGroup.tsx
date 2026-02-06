@@ -22,7 +22,7 @@ export default function StatGroup({
   const safePct = Number.isFinite(pct) ? pct : 0;
   const MissingSuperGoal = (meta * 1.1) - realized;
   const barPct = Math.min(Math.max(safePct, 0), 100);
-  const isMonth = label === "Mês Atual"
+  const isMonth = label === "Metas Mês" 
 
   
   const shouldShowBonus100 =
@@ -34,14 +34,9 @@ export default function StatGroup({
     <div className="flex-1 min-w-50 h-full">
       <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col px-5 2xl:px-3">
         <div className="min-h-14 flex items-end justify-between mb-2">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-              {label}
-            </p>
-            <p className="text-lg font-black text-slate-800 leading-none tabular-nums whitespace-nowrap">
-              {formatBRL(realized)}
-            </p>
-          </div>
+          <p className="text-lg font-black text-slate-800 leading-none tabular-nums whitespace-nowrap">
+            {formatBRL(realized)}
+          </p>
 
           <div className="text-right min-w-30">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">

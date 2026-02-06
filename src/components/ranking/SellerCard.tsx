@@ -62,30 +62,30 @@ const monthBadge =
 
   return (
     <div className="group rounded-2xl bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow border border-slate-100">
-      {/* ⬇️ menos espaço e melhor alinhamento */}
-      <div className="flex flex-col md:flex-row md:items-stretch gap-6">
+      {/* GRID que alinha com o header */}
+      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr_1fr_1fr] gap-6 items-stretch">
+        
         {/* VENDEDOR */}
-        <div className="flex  items-center gap-4 w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-5">
-        <div className="relative shrink-0">
-           {rank <= 3 && (
-          <div
-            className={[
-              "absolute -top-3 left-1/2 -translate-x-1/2",
-              "text-[20px] leading-none",
-              rank === 1 ? "drop-shadow-sm" : "opacity-90",
-            ].join(" ")}
-            aria-hidden
-            title="Top 3"
-            >
-              👑
-          </div>
-           )}
+        <div className="flex items-center gap-4 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-6">
+          <div className="relative shrink-0">
+            {rank <= 3 && (
+              <div
+                className={[
+                  "absolute -top-3 left-1/2 -translate-x-1/2",
+                  "text-[20px] leading-none",
+                  rank === 1 ? "drop-shadow-sm" : "opacity-90",
+                ].join(" ")}
+                aria-hidden
+                title="Top 3"
+              >
+                👑
+              </div>
+            )}
 
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-xl font-black text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-            {rank}°
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-xl font-black text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+              {rank}°
+            </div>
           </div>
-        </div>
-
 
           <div className="min-w-0">
             <h3 className="truncate text-base font-bold text-slate-800">
@@ -93,20 +93,16 @@ const monthBadge =
             </h3>
 
             <div className="mt-2 flex flex-wrap gap-2">
-              {/* SEMANA ✓ (só quando bater) */}
               {weekBadge && <Badge tone="week">{weekBadge.text}</Badge>}
-
-              {/* MÊS 100/110 ✓ */}
               {monthBadge && <Badge tone="month">{monthBadge.text}</Badge>}
             </div>
-
           </div>
         </div>
 
-        {/* METAS */}
-        <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+        {/* SEMANA */}
+        <div className="md:pl-0">
           <StatGroup
-            label="Semana Atual"
+            label="" 
             meta={row.weekly_meta}
             realized={row.weekly_realized}
             missing={row.weekly_missing_value}
@@ -114,19 +110,24 @@ const monthBadge =
             hit={weeklyHit}
             bonus={row.weekly_bonus}
           />
+        </div>
 
-          <div className="relative md:pl-6 md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-12 md:before:w-px md:before:bg-slate-100">
-            <StatGroup
-              label="Mês Atual"
-              meta={row.goal_meta}
-              realized={row.net_sales}
-              missing={monthlyMissing}
-              pct={monthlyPct}
-              hit={monthlyHit}
-            />
-          </div>
+        {/* MÊS */}
+        <div className="md:relative md:pl-6 md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-12 md:before:w-px md:before:bg-slate-100">
+          <StatGroup
+            label="Metas Mês" 
+            meta={row.goal_meta}
+            realized={row.net_sales}
+            missing={monthlyMissing}
+            pct={monthlyPct}
+            hit={monthlyHit}
+          />
+        </div>
+
+        {/* POSITIVAÇÃO */}
+        <div className="md:relative md:pl-6 md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-12 md:before:w-px md:before:bg-slate-100">
           <WalletStatGroup
-            label="Positivação"
+            label="" 
             pct={row.wallet_positive_pct}
             total={row.wallet_total}
             positiveMonth={row.wallet_positive_month}
@@ -138,4 +139,5 @@ const monthBadge =
       </div>
     </div>
   );
+
 }

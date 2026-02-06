@@ -15,6 +15,7 @@ function formatPct(v: number, decimals = 2) {
 export default function RankingClient({
   weekOffset,
   weekLabel,
+  monthLabel,
   totalMonthGoal,
   sellers,
   totalMonthSold,
@@ -23,6 +24,7 @@ export default function RankingClient({
 }: {
   weekOffset: number;
   weekLabel: string;
+  monthLabel: string;
   totalMonthGoal: number;
   totalMonthSold: number;
   totalMonthPct: number;
@@ -121,12 +123,43 @@ export default function RankingClient({
         <div className="border-t border-slate-100" />
 
         <div className="px-4 sm:px-6 py-4">
-          <div className="flex flex-col gap-4">
+          <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-white/95 backdrop-blur border-b border-slate-100">
+            <div className="grid grid-cols-[280px_1fr_1fr_1fr] gap-6 items-end sticky">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-8">
+                Vendedor
+              </div>
+
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-10">
+                Semana
+                <div className="text-[11px] font-semibold text-slate-600 normal-case tracking-normal">
+                  {weekLabel}
+                </div>
+              </div>
+
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-12">
+                Meta Mensal
+                <div className="text-[11px] font-semibold text-slate-400 normal-case tracking-normal">
+                  {monthLabel}
+                </div>
+              </div>
+
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-15">
+                Positivação
+                <div className="text-[11px] font-semibold text-slate-600 normal-case tracking-normal">
+                  {monthLabel}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 pt-4">
             {ranked.map((row, idx) => (
               <SellerCard key={row.seller_id} row={row} rank={idx + 1} />
             ))}
           </div>
         </div>
+
+
       </div>
     </div>
   );
