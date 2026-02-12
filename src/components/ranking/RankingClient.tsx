@@ -20,7 +20,6 @@ export default function RankingClient({
   sellers,
   totalMonthSold,
   totalMonthPct,
-  
 }: {
   weekOffset: number;
   weekLabel: string;
@@ -124,7 +123,7 @@ export default function RankingClient({
 
         <div className="px-4 sm:px-6 py-4">
           <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-white/95 backdrop-blur border-b border-slate-100">
-            <div className="grid grid-cols-[280px_1fr_1fr_1fr] gap-6 items-end sticky">
+            <div className="grid grid-cols-[280px_1fr_1fr_1fr] gap-6 items-baseline sticky">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-8">
                 Vendedor
               </div>

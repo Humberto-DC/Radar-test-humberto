@@ -25,7 +25,7 @@ export default function WalletStatGroup({
 
   return (
     <div className="flex-1 min-w-50 h-full">
-      <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col px-15 2xl:px-10">
+      <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col  2xl:px-10">
         <div className="min-h-14 flex items-end justify-between mb-2">
         <p className="text-lg font-black text-slate-800 leading-none tabular-nums whitespace-nowrap">
           {positiveMonth}/{total}

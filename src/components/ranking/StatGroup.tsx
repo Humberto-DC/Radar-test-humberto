@@ -32,7 +32,7 @@ export default function StatGroup({
 
   return (
     <div className="flex-1 min-w-50 h-full">
-      <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col px-5 2xl:px-3">
+      <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col px-2 2xl:px-3">
         <div className="min-h-14 flex items-end justify-between mb-2">
           <p className="text-lg font-black text-slate-800 leading-none tabular-nums whitespace-nowrap">
             {formatBRL(realized)}
