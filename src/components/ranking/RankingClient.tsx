@@ -20,7 +20,6 @@ export default function RankingClient({
   sellers,
   totalMonthSold,
   totalMonthPct,
-  
 }: {
   weekOffset: number;
   weekLabel: string;

@@ -18,11 +18,16 @@ export type SellerGoalsRow = {
   seller_id: number;
   seller_name: string | null;
 
-  // do banco
-  monthly_meta: number;              // itens_metas (mês)
-  weekly_meta_month_accum: number;   // metas_semanal acumulada no mês (somatório das semanas do mês)
-  weekly_last3: WeekMetaItem[];      // últimas 3 semanas (R$)
+  monthly_meta: number;
+  weekly_meta_month_accum: number;
+  weekly_last3: WeekMetaItem[];
+
+  // ✅ para editar a semana exibida (ref week = weekRefs[0])
+  current_week_start: string; // ISO (yyyy-mm-dd ou ISO completo)
+  current_week_end: string;   // ISO
+  current_week_meta: number;  // valor atual no banco (ou 0)
 };
+
 
 export type GoalsHeaderData = {
   weekOffset: number;
@@ -30,7 +35,15 @@ export type GoalsHeaderData = {
   monthLabel: string;
 
   totalCompanyGoal: number;
-  byBranch: { empresa_id: number; goal: number }[];
+  byBranch: Array<{
+    empresa_id: number;
+    name: string;
+    goal: number;
+    realized: number;
+    pct: number;
+  }>;
+
+
 
   totalWeeklyMetaMonth: number;
 
@@ -71,7 +84,7 @@ export default function GoalsEditorClient({
         <div className="flex items-center gap-2">
           <Link
             href={`/ranking?weekOffset=${header.weekOffset}`}
-            className="flex flex-row gap-1 rounded-xl bg-[#a2f4a2]/80 px-3 py-2 text-sm font-semibold text-[#212529] hover:bg-gray-50"
+            className="flex flex-row gap-1 rounded-xl bg-[#80ef80] px-3 py-2 text-sm font-semibold text-[#212529] hover:bg-gray-50"
           >
             <ChevronLeft className="h-5 w-5" />
             Voltar ao ranking
@@ -83,7 +96,10 @@ export default function GoalsEditorClient({
           <div className="flex justify-between items-center gap-3">
             <button
               type="button"
-              onClick={() => router.push(`/goals?weekOffset=${header.weekOffset - 1}`)}
+              onClick={() => {
+                router.push(`/goals?weekOffset=${header.weekOffset - 1}`)
+                router.refresh();
+              }}
               className="rounded-xl border border-gray-200 bg-white p-1 text-[#212529]  transition hover:-translate-y-0.5 hover:bg-gray-50 active:translate-y-0"
               aria-label="Semana anterior"
               title="Semana anterior"
@@ -97,7 +113,10 @@ export default function GoalsEditorClient({
 
             <button
             type="button"
-            onClick={() => router.push(`/goals?weekOffset=${header.weekOffset + 1}`)}
+            onClick={() => {
+              router.push(`/goals?weekOffset=${header.weekOffset + 1}`)
+              router.refresh();
+            }}
             className="rounded-xl border border-gray-200 bg-white p-1 text-[#212529]  transition hover:-translate-y-0.5 hover:bg-gray-50 active:translate-y-0"
               aria-label="Semana anterior"
             >
@@ -114,9 +133,9 @@ export default function GoalsEditorClient({
 
 
       {/* lista */}
-      <div className="mt-4 grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="mt-4 grid gap-5 lg:grid-cols-3 2xl:grid-cols-4">
         {filtered.map((s) => (
-          <SellerGoalsCard key={s.seller_id} row={s} />
+          <SellerGoalsCard key={`${s.seller_id}-${header.weekOffset}`} row={s} />
         ))}
 
         {filtered.length === 0 && (
