@@ -2,7 +2,6 @@
 
 import React from "react";
 import type { RankingSellerRow } from "@/app/(app)/ranking/page";
-import { formatBRL }from  "@/components/utils"
 import  StatGroup  from "./StatGroup"
 import WalletStatGroup from "./WalletStatGroup";
 function Badge({
@@ -29,8 +28,6 @@ function Badge({
   );
 }
 
-
-export { formatBRL };
 
 export default function SellerCard({
   row,
@@ -61,7 +58,7 @@ const monthBadge =
     : null;
 
   return (
-    <div className="group rounded-2xl bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow border border-slate-100">
+    <div className="group rounded-2xl bg-white sm:px-2 sm:py-1 shadow-sm hover:shadow-md transition-shadow border border-slate-100">
       {/* GRID que alinha com o header */}
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr_1fr_1fr] gap-6 items-stretch">
         
@@ -125,7 +122,7 @@ const monthBadge =
         </div>
 
         {/* POSITIVAÇÃO */}
-        <div className="md:relative md:pl-6 md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-12 md:before:w-px md:before:bg-slate-100">
+        <div className="md:relative md:pl-0 md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-12 md:before:w-px md:before:bg-slate-100">
           <WalletStatGroup
             label="" 
             pct={row.wallet_positive_pct}

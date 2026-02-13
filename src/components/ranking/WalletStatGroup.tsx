@@ -24,7 +24,7 @@ export default function WalletStatGroup({
   const shouldShowBadges = total > 0;
 
   return (
-    <div className="flex-1 min-w-50 h-full">
+    <div className="flex-1 w-full h-full">
       <div className="h-full max-w-2xs mx-auto md:mx-0 md:max-w-none flex flex-col  2xl:px-10">
         <div className="min-h-14 flex items-end justify-between mb-2">
         <p className="text-lg font-black text-slate-800 leading-none tabular-nums whitespace-nowrap">
@@ -59,7 +59,7 @@ export default function WalletStatGroup({
         <div className="min-h-6 flex justify-between items-center">
           <div className="min-w-0">
             {shouldShowBadges ? (
-              <div className="flex gap-3 flex-wrap">
+              <div className="flex gap-2 flex-wrap">
                 <span className="text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded whitespace-nowrap">
                   Msg pendente {needMessage}
                 </span>

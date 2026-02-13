@@ -72,12 +72,12 @@ export default async function GoalsPage({ searchParams }: { searchParams?: Promi
     refMonday.getFullYear() * 100 + (refMonday.getMonth() + 1);
 
   // semanas (últimas 3) relativas ao weekOffset: [ref, ref-1, ref-2]
-  const weekRefs = [-4, -8, -12].map((delta) => {
+  const weekRefs = [0, -4, -8, -12].map((delta) => {
     const d = new Date(refMonday);
     d.setDate(d.getDate() + delta * 7);
     const { monday, friday } = getWeekRangeFromRef(d);
     return {
-      idx: delta, // 0, -1, -2
+      idx: delta, 
       monday,
       friday,
       label: `${fmtBRShort(monday)} — ${fmtBRShort(friday)}`,
@@ -320,11 +320,13 @@ WITH
 
   -- três semanas: usamos as datas prontas do server via args (w1,w2,w3)
   weeks AS (
-    SELECT 1 AS ord, $3::date AS week_ini, $4::date AS week_fim
+    SELECT 1 AS ord, $3::date AS week_ini, $4::date AS week_fim   -- w0
     UNION ALL
-    SELECT 2 AS ord, $5::date AS week_ini, $6::date AS week_fim
+    SELECT 2 AS ord, $5::date AS week_ini, $6::date AS week_fim   -- w4
     UNION ALL
-    SELECT 3 AS ord, $7::date AS week_ini, $8::date AS week_fim
+    SELECT 3 AS ord, $7::date AS week_ini, $8::date AS week_fim   -- w8
+    UNION ALL
+    SELECT 4 AS ord, $9::date AS week_ini, $10::date AS week_fim  -- w12
   ),
 
   metas_3semanas AS (
@@ -378,9 +380,10 @@ SELECT
   COALESCE(wm.weekly_meta_month_accum, 0)::numeric AS weekly_meta_month_accum,
 
   -- pivot das 3 semanas
-  COALESCE(MAX(CASE WHEN m3.ord = 1 THEN m3.weekly_meta END), 0)::numeric AS w1_meta,
-  COALESCE(MAX(CASE WHEN m3.ord = 2 THEN m3.weekly_meta END), 0)::numeric AS w2_meta,
-  COALESCE(MAX(CASE WHEN m3.ord = 3 THEN m3.weekly_meta END), 0)::numeric AS w3_meta
+  COALESCE(MAX(CASE WHEN m3.ord = 1 THEN m3.weekly_meta END), 0)::numeric AS w0_meta,
+  COALESCE(MAX(CASE WHEN m3.ord = 2 THEN m3.weekly_meta END), 0)::numeric AS w4_meta,
+  COALESCE(MAX(CASE WHEN m3.ord = 3 THEN m3.weekly_meta END), 0)::numeric AS w8_meta,
+  COALESCE(MAX(CASE WHEN m3.ord = 4 THEN m3.weekly_meta END), 0)::numeric AS w12_meta
 
 FROM sellers s
 LEFT JOIN metas_mensais mm ON mm.seller_id = s.seller_id
@@ -391,26 +394,34 @@ ORDER BY s.seller_name NULLS LAST;
   `;
 
   // args das 3 semanas
-  const w1 = weekRefs[0];
-  const w2 = weekRefs[1];
-  const w3 = weekRefs[2];
+  const w0 = weekRefs[0];
+  const w4 = weekRefs[1];
+  const w8 = weekRefs[2];
+  const w12 = weekRefs[3];
 
   const { rows: sellersRowsRaw } = await radarPool.query(sqlSellersGoals, [
     sellerIds,
     new Date(refMonday.getFullYear(), refMonday.getMonth(), refMonday.getDate()),
-    new Date(w1.monday.getFullYear(), w1.monday.getMonth(), w1.monday.getDate()),
-    new Date(w1.friday.getFullYear(), w1.friday.getMonth(), w1.friday.getDate()),
-    new Date(w2.monday.getFullYear(), w2.monday.getMonth(), w2.monday.getDate()),
-    new Date(w2.friday.getFullYear(), w2.friday.getMonth(), w2.friday.getDate()),
-    new Date(w3.monday.getFullYear(), w3.monday.getMonth(), w3.monday.getDate()),
-    new Date(w3.friday.getFullYear(), w3.friday.getMonth(), w3.friday.getDate()),
+
+    new Date(w0.monday.getFullYear(), w0.monday.getMonth(), w0.monday.getDate()),
+    new Date(w0.friday.getFullYear(), w0.friday.getMonth(), w0.friday.getDate()),
+
+    new Date(w4.monday.getFullYear(), w4.monday.getMonth(), w4.monday.getDate()),
+    new Date(w4.friday.getFullYear(), w4.friday.getMonth(), w4.friday.getDate()),
+
+    new Date(w8.monday.getFullYear(), w8.monday.getMonth(), w8.monday.getDate()),
+    new Date(w8.friday.getFullYear(), w8.friday.getMonth(), w8.friday.getDate()),
+
+    new Date(w12.monday.getFullYear(), w12.monday.getMonth(), w12.monday.getDate()),
+    new Date(w12.friday.getFullYear(), w12.friday.getMonth(), w12.friday.getDate()),
   ]);
+
 
   const sellers: SellerGoalsRow[] = (sellersRowsRaw as any[]).map((r) => {
     const weeklyLast3: WeekMetaItem[] = [
-      { label: w1.label, week_ini: w1.monday.toISOString(), week_fim: w1.friday.toISOString(), weekly_meta: toNumber(r.w1_meta) },
-      { label: w2.label, week_ini: w2.monday.toISOString(), week_fim: w2.friday.toISOString(), weekly_meta: toNumber(r.w2_meta) },
-      { label: w3.label, week_ini: w3.monday.toISOString(), week_fim: w3.friday.toISOString(), weekly_meta: toNumber(r.w3_meta) },
+      { label: w4.label,  week_ini: w4.monday.toISOString(),  week_fim: w4.friday.toISOString(),  weekly_meta: toNumber(r.w4_meta) },
+      { label: w8.label,  week_ini: w8.monday.toISOString(),  week_fim: w8.friday.toISOString(),  weekly_meta: toNumber(r.w8_meta) },
+      { label: w12.label, week_ini: w12.monday.toISOString(), week_fim: w12.friday.toISOString(), weekly_meta: toNumber(r.w12_meta) },
     ];
 
     return {
@@ -420,12 +431,13 @@ ORDER BY s.seller_name NULLS LAST;
       weekly_meta_month_accum: toNumber(r.weekly_meta_month_accum),
       weekly_last3: weeklyLast3,
 
-      // ✅ semana “editável” = semana que está na tela (w1 / ref week)
-      current_week_start: new Date(w1.monday.getFullYear(), w1.monday.getMonth(), w1.monday.getDate()).toISOString(),
-      current_week_end: new Date(w1.friday.getFullYear(), w1.friday.getMonth(), w1.friday.getDate()).toISOString(),
-      current_week_meta: toNumber(r.w1_meta),
+      // ✅ input sempre na semana atual da tela
+      current_week_start: new Date(w0.monday.getFullYear(), w0.monday.getMonth(), w0.monday.getDate()).toISOString(),
+      current_week_end: new Date(w0.friday.getFullYear(), w0.friday.getMonth(), w0.friday.getDate()).toISOString(),
+      current_week_meta: toNumber(r.w0_meta),
     };
   });
+
 
 
   const totalWeeklyMetaMonth = sellers.reduce(
