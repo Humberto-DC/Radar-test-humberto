@@ -16,6 +16,8 @@ export type Row = {
   // orçamento (1 linha por orçamento)
   orcamento_id: number | string;
   validade_orcamento_min: Date | null;
+  orcamento_status?: string | null;
+
 
   // flag p/ UI
   is_carteira: boolean;
@@ -59,6 +61,7 @@ export type OpenBudgetCard = {
   // por orçamento (1 linha)
   open_budget_id: number | null;
   validade_orcamento_min: string | null;
+  orcamento_status: string | null;
 
   contatos: ContatoRow[];
 
