@@ -33,10 +33,28 @@ export default function HeaderTabs({ isAdmin }: { isAdmin: boolean }) {
       </Link>
 
       {isAdmin && (
-        <Link href="/ranking" className={tabClass(isAdminDash)}>
-          <ShieldUser className="h-4 w-4" />
-          ranking
-        </Link>
+        <>
+          <Link href="/ranking" className={tabClass(pathname.startsWith("/ranking"))}>
+            <ShieldUser className="h-4 w-4" />
+            Ranking
+          </Link>
+          <Link href="/orcamentos" className={tabClass(pathname.startsWith("/orcamentos"))}>
+            <Target className="h-4 w-4" />
+            Orçamentos
+          </Link>
+          <Link href="/adminDashboard" className={tabClass(pathname.startsWith("/adminDashboard"))}>
+            <LayoutGrid className="h-4 w-4" />
+            Monitor ADM
+          </Link>
+          <Link href="/goals" className={tabClass(pathname.startsWith("/goals"))}>
+            <Target className="h-4 w-4" />
+            Metas
+          </Link>
+          <Link href="/financeiro" className={tabClass(pathname.startsWith("/financeiro"))}>
+            <ShieldUser className="h-4 w-4" />
+            Financeiro
+          </Link>
+        </>
       )}
     </nav>
   );

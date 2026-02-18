@@ -22,12 +22,12 @@ type RadarJoinedRow = {
 
   can_undo: boolean | null;
   ultima_compra: Date | null;
-  last_sale_orcamento_id :number | null;
+  last_sale_orcamento_id: number | null;
 
   orcamentos_abertos: number;
   validade_orcamento_min: Date | null;
   tem_orcamento_aberto: boolean | "t" | "f" | 1 | 0;
-  open_budget_id:number;
+  open_budget_id: number;
 
 
   contatos_json: Array<{
@@ -71,15 +71,15 @@ export default async function Page() {
   let where = `1=1`;
 
   // só ativos
-  where += ` AND COALESCE(c.cliente_ativo,'S') <> 'N'`;
+  where += ` AND COALESCE(cl.cliente_ativo,'S') <> 'N'`;
 
   // seller: filtra carteira
   if (session.role === "seller") {
     if (session.sellerId === -1) {
-      where += ` AND c.vendedor_id IS NULL`;
+      where += ` AND cl.funcionario_id IS NULL`;
     } else {
       params.push(session.sellerId);
-      where += ` AND (c.vendedor_id)::int = $${params.length}::int`;
+      where += ` AND (cl.funcionario_id)::int = $${params.length}::int`;
     }
   }
 
@@ -91,16 +91,16 @@ export default async function Page() {
     params.push(ADMIN_SELLER_IDS);
 
     where += `
-      AND c.vendedor_id IS NOT NULL
-      AND (c.vendedor_id)::int = ANY($${params.length}::int[])
-      AND COALESCE(TRIM(c.nome_vendedor), '') <> ''
-      AND UPPER(TRIM(c.nome_vendedor)) NOT LIKE 'GRUPO%'
-      AND UPPER(TRIM(c.nome_vendedor)) NOT LIKE 'VENDEDOR%'
+      AND cl.funcionario_id IS NOT NULL
+      AND (cl.funcionario_id)::int = ANY($${params.length}::int[])
+      AND COALESCE(TRIM(f.nome), '') <> ''
+      AND UPPER(TRIM(f.nome)) NOT LIKE 'GRUPO%'
+      AND UPPER(TRIM(f.nome)) NOT LIKE 'VENDEDOR%'
     `;
   }
 
 
-  const sql =  `
+  const sql = `
     WITH last_sale AS (
       SELECT DISTINCT ON (o.cadastro_id)
         o.cadastro_id AS cliente_id,
@@ -166,15 +166,18 @@ export default async function Page() {
       GROUP BY o.cadastro_id
     )
     SELECT
-      c.cadastro_id,
-      c.nome_razao_social,
-      c.nome_fantasia,
-      c.nome_cidade,
-      c.estado_id,
-      c.nome_vendedor,
-      c.vendedor_id,
-      c.limite_credito_aprovado,
-      c.cliente_ativo,
+      cad.cadastro_id,
+      cad.nome_razao_social,
+      cad.nome_fantasia,
+      cid.nome AS nome_cidade,
+      cid.estado_id,
+      f.nome AS nome_vendedor,
+      cl.funcionario_id AS vendedor_id,
+      clc.limite_credito_aprovado,
+      cl.cliente_ativo,
+      b.nome AS nome_bairro,
+      cid.nome AS nome_cidade,
+      cid.estado_id,
 
       i.ultima_interacao,
       i.proxima_interacao,
@@ -194,15 +197,20 @@ export default async function Page() {
       ob.open_budget_id,
 
       COALESCE(ct.contatos_json, '[]'::jsonb) AS contatos_json
-    FROM public.vw_web_clientes c
+    FROM public.cadastros cad
+    JOIN public.clientes cl ON cl.cadastro_id = cad.cadastro_id
+    LEFT JOIN public.funcionarios f ON f.funcionario_id = cl.funcionario_id
+    LEFT JOIN public.clientes_limite_credito clc ON clc.cliente_limite_credito_id = cl.cliente_limite_credito_id
+    LEFT JOIN public.bairros b ON b.bairro_id = cad.bairro_id
+    LEFT JOIN public.cidades cid ON cid.cidade_id = b.cidade_id
     LEFT JOIN public.crm_interacoes_radar i
-      ON i.cliente_id = c.cadastro_id
+      ON i.cliente_id = cad.cadastro_id
     LEFT JOIN last_sale ls
-      ON ls.cliente_id = c.cadastro_id
+      ON ls.cliente_id = cad.cadastro_id
     LEFT JOIN contatos ct
-      ON ct.cadastro_id = c.cadastro_id
+      ON ct.cadastro_id = cad.cadastro_id
     LEFT JOIN open_budgets ob
-      ON ob.cadastro_id = c.cadastro_id
+      ON ob.cadastro_id = cad.cadastro_id
     WHERE ${where}
     ORDER BY
       (ls.ultima_compra IS NULL) ASC,
@@ -211,65 +219,93 @@ export default async function Page() {
     `;
 
 
-  const { rows } = await radarPool.query<RadarJoinedRow>(sql, params);
+  let rows: RadarJoinedRow[] = [];
+  try {
+    const result = await radarPool.query<RadarJoinedRow>(sql, params);
+    rows = result.rows;
+  } catch (error: any) {
+    console.error("❌ Erro na consulta ao Radar:", {
+      message: error.message,
+      detail: error.detail,
+      code: error.code,
+      stack: error.stack,
+    });
+    throw new Error(`Falha ao carregar dados do banco: ${error.message || 'Erro desconhecido'}`);
+  }
 
-  const enriched: ClienteComContatos[] = rows.map((r) => {
-    const clientId = Number(r.cadastro_id); // ✅ normaliza bigint/string -> number
-    const sellerId = r.vendedor_id == null ? null : Number(r.vendedor_id); // ✅
-    const hasOpenBudget =
-      r.tem_orcamento_aberto === true ||
-      r.tem_orcamento_aberto === "t" ||
-      r.tem_orcamento_aberto === 1; // ✅
+  const safeISO = (d: any) => {
+    if (!d) return null;
+    try {
+      const date = new Date(d);
+      if (isNaN(date.getTime())) return null;
+      return date.toISOString();
+    } catch {
+      return null;
+    }
+  };
+
+  const enriched: ClienteComContatos[] = rows.map((r, idx) => {
+    try {
+      const clientId = Number(r.cadastro_id);
+      const sellerId = r.vendedor_id == null ? null : Number(r.vendedor_id);
+      const hasOpenBudget =
+        r.tem_orcamento_aberto === true ||
+        r.tem_orcamento_aberto === "t" ||
+        r.tem_orcamento_aberto === 1;
 
       const openBudgetId = r.open_budget_id == null ? null : Number(r.open_budget_id);
       const lastSaleOrcamentoId =
         r.last_sale_orcamento_id == null ? null : Number(r.last_sale_orcamento_id);
 
-
-    const contatos: ContatoRow[] = (r.contatos_json ?? []).map((c) => ({
-      id_contato: c.id_contato,
-      id_cliente: clientId, // ✅ usa number (não r.cadastro_id)
-      nome_contato: (c.nome_contato ?? "").trim(),
-      funcao: c.funcao ?? null,
-      telefone: (c.celular ?? c.telefone) ?? null,
-      criado_em: c.criado_em ? new Date(c.criado_em).toISOString() : null,
-    }));
+      const contatos: ContatoRow[] = (r.contatos_json ?? []).map((c) => ({
+        id_contato: c.id_contato,
+        id_cliente: clientId,
+        nome_contato: (c.nome_contato ?? "").trim(),
+        funcao: c.funcao ?? null,
+        telefone: (c.celular ?? c.telefone) ?? null,
+        criado_em: safeISO(c.criado_em),
+      }));
       const principal = contatos.find((c) => c.telefone)?.telefone ?? null;
 
-  const row: ClienteRow = {
-    id_cliente: clientId,
-    Cliente: pickClientName(r),
-    Razao_social: (r.nome_razao_social ?? "").trim(),
-    Cidade: (r.nome_cidade ?? "").trim(),
-    Estado: (r.estado_id ?? "").trim(),
-    Vendedor: (r.nome_vendedor ?? "").trim(),
-    Limite: Number(r.limite_credito_aprovado ?? 0),
+      const row: ClienteRow = {
+        id_cliente: clientId,
+        Cliente: pickClientName(r),
+        Razao_social: (r.nome_razao_social ?? "").trim(),
+        Cidade: (r.nome_cidade ?? "").trim(),
+        Estado: (r.estado_id ?? "").trim(),
+        Vendedor: (r.nome_vendedor ?? "").trim(),
+        Limite: Number(r.limite_credito_aprovado ?? 0),
 
-    telefone: principal,
-    tel_celular: principal,
+        telefone: principal,
+        tel_celular: principal,
 
-    ultima_compra: r.ultima_compra ? new Date(r.ultima_compra).toISOString() : null,
-    last_sale_orcamento_id: lastSaleOrcamentoId,
-    ultima_interacao: r.ultima_interacao ? new Date(r.ultima_interacao).toISOString() : null,
-    proxima_interacao: r.proxima_interacao ? new Date(r.proxima_interacao).toISOString() : null,
-    observacoes: r.observacoes ?? null,
+        ultima_compra: safeISO(r.ultima_compra),
+        last_sale_orcamento_id: lastSaleOrcamentoId,
+        ultima_interacao: safeISO(r.ultima_interacao),
+        proxima_interacao: safeISO(r.proxima_interacao),
+        observacoes: r.observacoes ?? null,
 
-    can_undo: Boolean(r.can_undo),
+        can_undo: Boolean(r.can_undo),
 
-    id_vendedor: sellerId,
-    ativo: isActiveFlag(r.cliente_ativo),
+        id_vendedor: sellerId,
+        ativo: isActiveFlag(r.cliente_ativo),
 
-    orcamentos_abertos: Number(r.orcamentos_abertos ?? 0),
-    validade_orcamento_min: r.validade_orcamento_min
-      ? new Date(r.validade_orcamento_min).toISOString()
-      : null,
+        orcamentos_abertos: Number(r.orcamentos_abertos ?? 0),
+        validade_orcamento_min: safeISO(r.validade_orcamento_min),
 
-    tem_orcamento_aberto: hasOpenBudget,
-    open_budget_id: openBudgetId,
-  };
+        tem_orcamento_aberto: hasOpenBudget,
+        open_budget_id: openBudgetId,
+      };
 
-  return { ...row, contatos };
-});
+      return { ...row, contatos };
+    } catch (err) {
+      console.error(`❌ Erro mapeando linha ${idx}:`, r.cadastro_id, err);
+      // Retorna nulo ou um objeto vazio para não quebrar todo o map, 
+      // ou apenas lança o erro se preferir que falhe tudo.
+      // Vou lançar para ver o erro no terminal.
+      throw err;
+    }
+  }).filter(Boolean) as ClienteComContatos[];
 
-  return <HomeClient clients={enriched} nowISO={nowISO}/>;
+  return <HomeClient clients={enriched} nowISO={nowISO} />;
 }

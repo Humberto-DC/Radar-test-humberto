@@ -21,3 +21,7 @@ export const radarPool = new Pool({
   max: 10,
   idleTimeoutMillis: 30_000,
 });
+
+radarPool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});

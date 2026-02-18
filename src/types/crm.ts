@@ -9,7 +9,7 @@ export type ClienteRow = {
   Vendedor: string;
   Limite: number;
 
-  ultima_compra: string | null;   
+  ultima_compra: string | null;
   last_sale_orcamento_id: number | null;        // ISO string
   ultima_interacao: string | null;         // ISO string
   proxima_interacao: string | null;    // ISO string (anterior)
@@ -24,7 +24,8 @@ export type ClienteRow = {
   validade_orcamento_min: string | null; // ISO
   tem_orcamento_aberto?: boolean; // ✅ adiciona isso
   open_budget_id?: number | null; // ✅ novo
-
+  orcamento_status?: string | null;
+  valor_total?: number;
 };
 
 export type ContatoRow = {

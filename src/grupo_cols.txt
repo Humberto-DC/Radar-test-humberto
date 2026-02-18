@@ -1,0 +1,66 @@
+[
+  {
+    "table_name": "clientes",
+    "column_name": "grupo_financeiro_id"
+  },
+  {
+    "table_name": "produtos",
+    "column_name": "quantidade_grupo_compra"
+  },
+  {
+    "table_name": "produtos",
+    "column_name": "quantidade_grupo_compra_2"
+  },
+  {
+    "table_name": "clientes",
+    "column_name": "grupo_clientes_id"
+  },
+  {
+    "table_name": "funcionarios",
+    "column_name": "grupo_autorizacao_id"
+  },
+  {
+    "table_name": "orcamentos",
+    "column_name": "grupo_entrega_id"
+  },
+  {
+    "table_name": "requisicoes_devolucoes",
+    "column_name": "grupo_nota_devolucao_id"
+  },
+  {
+    "table_name": "produtos",
+    "column_name": "grupo_nome_popular_id"
+  },
+  {
+    "table_name": "produtos",
+    "column_name": "grupo_preco_madeira_id"
+  },
+  {
+    "table_name": "produtos",
+    "column_name": "grupo_produtos_id"
+  },
+  {
+    "table_name": "produtos",
+    "column_name": "grupo_indices_precos_cond_id"
+  },
+  {
+    "table_name": "financeiro_check",
+    "column_name": "grupo_finan_solic_id"
+  },
+  {
+    "table_name": "funcionarios",
+    "column_name": "grupo_autorizacao_santri_ctb"
+  },
+  {
+    "table_name": "empresas",
+    "column_name": "grupo_totem_ociosidade_id"
+  },
+  {
+    "table_name": "empresas",
+    "column_name": "grupo_totem_layout_id"
+  },
+  {
+    "table_name": "orcamentos",
+    "column_name": "grupo_cupons_promocionais_id"
+  }
+]

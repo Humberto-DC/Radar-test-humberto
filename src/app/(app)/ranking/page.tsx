@@ -59,7 +59,7 @@ export type RankingSellerRow = {
   wallet_positive_pct: number;     // % positivação
   need_message: number;            // precisa mandar mensagem
   follow_up: number;               // acompanhar
-  open_budgets: number;   
+  open_budgets: number;
 };
 
 type SP = Record<string, string | string[] | undefined> | undefined;
@@ -85,9 +85,9 @@ export default async function AdminRankingPage({
 
   const raw = first(sp?.weekOffset);
   const parsed = Number.parseInt(raw ?? "0", 10);
-  const weekOffset = clampInt(Number.isFinite(parsed) ? parsed : 0, -104, 104); 
+  const weekOffset = clampInt(Number.isFinite(parsed) ? parsed : 0, -104, 104);
 
-  
+
   const dataRef = new Date();
   dataRef.setDate(dataRef.getDate() + weekOffset * 7);
 
@@ -234,7 +234,7 @@ export default async function AdminRankingPage({
   const whereSellersMonthly = `f.funcionario_id IS NOT NULL AND f.funcionario_id::int = ANY($1::int[])`;
   const whereSellersWeekly = `f.funcionario_id IS NOT NULL AND f.funcionario_id::int = ANY($1::int[])`;
 
-  const sql =  `
+  const sql = `
 WITH
   params AS ( SELECT $2::date AS data_ref ),
 
@@ -446,15 +446,16 @@ WITH
      ========================= */
   carteira_base AS (
     SELECT
-      c.vendedor_id::int AS seller_id,
-      c.cadastro_id::bigint AS cliente_id
-    FROM public.vw_web_clientes c
-    WHERE COALESCE(c.cliente_ativo,'S') <> 'N'
-      AND c.vendedor_id IS NOT NULL
-      AND (c.vendedor_id)::int = ANY($1::int[])
-      AND COALESCE(TRIM(c.nome_vendedor), '') <> ''
-      AND UPPER(TRIM(c.nome_vendedor)) NOT LIKE 'GRUPO%'
-      AND UPPER(TRIM(c.nome_vendedor)) NOT LIKE 'VENDEDOR%'
+      cl.funcionario_id::int AS seller_id,
+      cl.cadastro_id::bigint AS cliente_id
+    FROM public.clientes cl
+    JOIN public.funcionarios f ON f.funcionario_id = cl.funcionario_id
+    WHERE COALESCE(cl.cliente_ativo,'S') <> 'N'
+      AND cl.funcionario_id IS NOT NULL
+      AND (cl.funcionario_id)::int = ANY($1::int[])
+      AND COALESCE(TRIM(f.nome), '') <> ''
+      AND UPPER(TRIM(f.nome)) NOT LIKE 'GRUPO%'
+      AND UPPER(TRIM(f.nome)) NOT LIKE 'VENDEDOR%'
   ),
 
   -- ✅ positivado no mês, mas só até o dt_fim_ref (fim do mês ou hoje)
@@ -591,12 +592,12 @@ ORDER BY weekly_pct_achieved DESC, weekly_realized DESC, net_sales DESC;
 
   const { rows: totalGoalRows } = await radarPool.query(sqlTotalMonthGoal, [
     empresaIds,
-    args[1], 
+    args[1],
   ]);
-   const totalMonthGoal = toNumber(totalGoalRows?.[0]?.total_goal);
+  const totalMonthGoal = toNumber(totalGoalRows?.[0]?.total_goal);
 
 
-  
+
 
 
   const { rows } = await radarPool.query(sql, args);
@@ -631,7 +632,7 @@ ORDER BY weekly_pct_achieved DESC, weekly_realized DESC, net_sales DESC;
 
 
   const weekLabel = `${fmtBRShort(monday)} — ${fmtBRShort(friday)}`;
-  const monthLabel = fmtMonthBR(monday); 
+  const monthLabel = fmtMonthBR(monday);
 
   return (
     <RankingClient

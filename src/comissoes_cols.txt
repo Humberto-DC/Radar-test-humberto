@@ -1,0 +1,1 @@
+data_migracao, comissao_vista, data_final_com_esp, data_hora_alteracao, data_inicio_com_esp, valor_comissao_montagem, perc_comissao_ponta_estoque, comissao_prazo, perc_comissao_esp, perc_comissao_profissional, produto_id, usuario_alteracao, valor_comissao_esp, valor_prazo, valor_vista, perc_comissao_montagem, estacao_alteracao, processo_alteracao, usuario_alteracao_santri_id

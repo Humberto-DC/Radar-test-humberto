@@ -66,26 +66,26 @@ export default function DashboardClientCard({ client }: Props) {
 
   // validade
 
-function parseDateOnly(raw: string): Date | null {
-  // pega só YYYY-MM-DD mesmo que venha ISO completo
-  const datePart = raw.slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return null;
+  function parseDateOnly(raw: string): Date | null {
+    // pega só YYYY-MM-DD mesmo que venha ISO completo
+    const datePart = raw.slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return null;
 
-  const [y, m, d] = datePart.split("-").map(Number);
-  return new Date(y, m - 1, d); // meia-noite LOCAL
-}
+    const [y, m, d] = datePart.split("-").map(Number);
+    return new Date(y, m - 1, d); // meia-noite LOCAL
+  }
 
-const validUntil = useMemo(() => {
-  const raw = client.validade_orcamento_min;
-  if (!raw) return null;
+  const validUntil = useMemo(() => {
+    const raw = client.validade_orcamento_min;
+    if (!raw) return null;
 
-  // ✅ parse seguro (ignora timezone do ISO)
-  const dLocal = parseDateOnly(raw);
-  if (dLocal) return dLocal;
+    // ✅ parse seguro (ignora timezone do ISO)
+    const dLocal = parseDateOnly(raw);
+    if (dLocal) return dLocal;
 
-  // fallback se vier em outro formato
-  return parseLooseDate(raw as any) ?? null;
-}, [client.validade_orcamento_min]);
+    // fallback se vier em outro formato
+    return parseLooseDate(raw as any) ?? null;
+  }, [client.validade_orcamento_min]);
 
 
 

@@ -6,14 +6,15 @@ type Seller = { id: number; nome: string };
 export default async function Page() {
   const sql = `
     SELECT
-      vendedor_id,
-      TRIM(nome_vendedor) AS nome_vendedor
-    FROM public.vw_web_clientes
-    WHERE vendedor_id IS NOT NULL
-      AND COALESCE(TRIM(nome_vendedor), '') <> ''
+      funcionario_id AS vendedor_id,
+      TRIM(nome) AS nome_vendedor
+    FROM public.funcionarios
+    WHERE vendedor = 'S'
+      AND COALESCE(ativo, 'N') = 'S'
+      AND COALESCE(TRIM(nome), '') <> ''
 
       -- ❌ exclui nomes específicos
-      AND TRIM(nome_vendedor) NOT IN (
+      AND TRIM(nome) NOT IN (
         'ANA CLAUDIA DA COSTA SILVA',
         'LAIS PEREIRA BARBOSA',
         'IARA COSTA DA SILVA',
@@ -21,9 +22,9 @@ export default async function Page() {
       )
 
       -- ❌ exclui QUALQUER nome que comece com "VENDEDOR"
-      AND UPPER(TRIM(nome_vendedor)) NOT LIKE 'VENDEDOR%'
+      AND UPPER(TRIM(nome)) NOT LIKE 'VENDEDOR%'
 
-    GROUP BY vendedor_id, TRIM(nome_vendedor);
+    GROUP BY funcionario_id, TRIM(nome);
   `;
 
   const { rows } = await radarPool.query<{

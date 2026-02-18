@@ -77,7 +77,7 @@ export default async function GoalsPage({ searchParams }: { searchParams?: Promi
     d.setDate(d.getDate() + delta * 7);
     const { monday, friday } = getWeekRangeFromRef(d);
     return {
-      idx: delta, 
+      idx: delta,
       monday,
       friday,
       label: `${fmtBRShort(monday)} — ${fmtBRShort(friday)}`,
@@ -340,8 +340,8 @@ WITH
     CROSS JOIN weeks w
     LEFT JOIN public.metas_semanal ms
       ON ms.vendedor_id::int = s.seller_id
-    AND ms.data_inicio = w.week_ini
-    AND ms.data_fim    = w.week_fim
+    AND ms.data_inicio <= w.week_ini
+    AND ms.data_fim    >= w.week_fim
     GROUP BY 1,2,3,4
   ),
 
@@ -368,8 +368,8 @@ WITH
     CROSS JOIN month_weeks mw
     LEFT JOIN public.metas_semanal ms
       ON ms.vendedor_id::int = s.seller_id
-    AND ms.data_inicio = mw.week_ini
-    AND ms.data_fim    = mw.week_fim
+    AND ms.data_inicio <= mw.week_ini
+    AND ms.data_fim    >= mw.week_fim
     GROUP BY 1
   )
 
@@ -420,8 +420,8 @@ ORDER BY s.seller_name NULLS LAST;
 
   const sellers: SellerGoalsRow[] = (sellersRowsRaw as any[]).map((r) => {
     const weeklyLast3: WeekMetaItem[] = [
-      { label: w4.label,  week_ini: w4.monday.toISOString(),  week_fim: w4.friday.toISOString(),  weekly_meta: toNumber(r.w4_meta) },
-      { label: w8.label,  week_ini: w8.monday.toISOString(),  week_fim: w8.friday.toISOString(),  weekly_meta: toNumber(r.w8_meta) },
+      { label: w4.label, week_ini: w4.monday.toISOString(), week_fim: w4.friday.toISOString(), weekly_meta: toNumber(r.w4_meta) },
+      { label: w8.label, week_ini: w8.monday.toISOString(), week_fim: w8.friday.toISOString(), weekly_meta: toNumber(r.w8_meta) },
       { label: w12.label, week_ini: w12.monday.toISOString(), week_fim: w12.friday.toISOString(), weekly_meta: toNumber(r.w12_meta) },
     ];
 

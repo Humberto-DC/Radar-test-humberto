@@ -1,0 +1,12 @@
+[
+  {
+    "sistema_origem_pedido": "ADM",
+    "tipo_sistema_recebeu_ped": "ADM",
+    "count": "19159"
+  },
+  {
+    "sistema_origem_pedido": "ADM",
+    "tipo_sistema_recebeu_ped": null,
+    "count": "3408"
+  }
+]

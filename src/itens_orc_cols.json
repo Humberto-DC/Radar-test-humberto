@@ -1,0 +1,482 @@
+[
+  {
+    "column_name": "arquivo_enviado_dotz_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "bloqueados",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "campanha_promocional_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "codigo_promocao_dotz_extra",
+    "data_type": "text"
+  },
+  {
+    "column_name": "credito_pis_cofins_medio",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "credito_pis_cofins_ult_ent",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "custo_comercial",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "custo_ult_entrada",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "dare_medio",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "dare_ultima_entrada",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "data_hora_alteracao",
+    "data_type": "timestamp without time zone"
+  },
+  {
+    "column_name": "desc_com_ind_grup_ind_preco",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "dev_acum_aberto_com_frete",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "dev_acum_aberto_com_out_desp",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "devolvidos",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "devolvidos_acum_aberto",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "dias_carencia_base_luc_pres",
+    "data_type": "bigint"
+  },
+  {
+    "column_name": "empresa_estoque_ret_lj_rede_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "empresa_retirar_produto_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "entregues",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "estacao_alteracao",
+    "data_type": "text"
+  },
+  {
+    "column_name": "fornecedor_venda_direta_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "icms_dare_medio",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "icms_dare_ultima_entrada",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "icms_frete_ultima_entrada",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "icms_medio",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "icms_ultima_entrada",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "impulso",
+    "data_type": "text"
+  },
+  {
+    "column_name": "indice_grupo_indice_preco",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "indice_preco_clientes",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "indice_preco_ncm",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "item_brinde_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "item_id",
+    "data_type": "bigint"
+  },
+  {
+    "column_name": "item_kit_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "item_pedido_compra",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "kit",
+    "data_type": "text"
+  },
+  {
+    "column_name": "orcamento_id",
+    "data_type": "bigint"
+  },
+  {
+    "column_name": "perc_custo_fixo_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "perc_custo_venda",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "perc_ipi",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "perc_preco_ponta_est_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "perc_preco_promo_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "ponta_estoque",
+    "data_type": "text"
+  },
+  {
+    "column_name": "preco_base",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "preco_base_promocao",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "preco_conceitual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "preco_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "preco_medio",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "preco_ponta_estoque_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "preco_promocao_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "preco_venda",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "previsao_entrega_sem_agen",
+    "data_type": "timestamp without time zone"
+  },
+  {
+    "column_name": "processo_alteracao",
+    "data_type": "text"
+  },
+  {
+    "column_name": "produto_id",
+    "data_type": "bigint"
+  },
+  {
+    "column_name": "produto_principal_kit_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "promocao_especial",
+    "data_type": "text"
+  },
+  {
+    "column_name": "promocao_relampago_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "quantidade",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_agendar",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_entrega_ato",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_entrega_ato_dep",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_entrega_ato_exp",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_entrega_ato_loj",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_estoque_disp_ant",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_utilizada_pre_ped",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "quantidade_vda_dir_entregue",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "regra_brinde_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "retirar_lojas_rede",
+    "data_type": "text"
+  },
+  {
+    "column_name": "servico",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tinta_a_granel_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tinta_base_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tinta_codigo_original",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tinta_grupo",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tinta_marca",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tinta_nome",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tinta_peso",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "tinta_unidade_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tipo_calculo_peso_venda",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tipo_local_padrao_entrega_ato",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tipo_preco_utilizado",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tipo_selec_local_entrega_ato",
+    "data_type": "text"
+  },
+  {
+    "column_name": "total_dotz_extra",
+    "data_type": "text"
+  },
+  {
+    "column_name": "usar_apenas_local_loja_ent_ato",
+    "data_type": "text"
+  },
+  {
+    "column_name": "usou_preco_manual",
+    "data_type": "text"
+  },
+  {
+    "column_name": "usou_promocao",
+    "data_type": "text"
+  },
+  {
+    "column_name": "usuario_alteracao",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "usuario_alteracao_santri_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "utilizou_custo_fixo_manual",
+    "data_type": "text"
+  },
+  {
+    "column_name": "valor_acrescimo_over_price",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_cashback_gerado",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_comis_unit_montagem",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_comissao_profissional",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_custo_difal_destino",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_custo_difal_origem",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_custo_extra_venda",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_custo_protege",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_deducao_db_icms_produzir",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_deducao_st_dare_custo",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_desconto_cashback_prop",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_desconto_cofins",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_desconto_pis",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_desconto_preco_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_desconto_proporcional",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_desconto_rel_comissao",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_desconto_venda_prop",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_fcp_st",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_frete_adicional_venda",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_frete_cif_embutido",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_frete_nao_cobrado_venda",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_frete_proporcional",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_ipi",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_juros_embutidos",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_out_desp_manual",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_outras_despesas_prop",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_retencao_fin_prop",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_servicos_adicionais",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_subst_trib",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_total",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "valor_unitario_comissao_esp",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "vlr_custo_estorno_icms_protege",
+    "data_type": "double precision"
+  }
+]

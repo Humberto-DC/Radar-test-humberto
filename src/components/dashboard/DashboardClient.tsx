@@ -1,7 +1,7 @@
 "use client";
 
 import type { OpenBudgetCard, SellerKpiRow } from "@/types/dashboard";
-import OpenBudgetsRow from "./OpenBudgetsRow";
+import OpenBudgetsKanban from "./OpenBudgetsKanban";
 import BudgetAchieved from "./BudgetAchieved";
 import DailyGoalCard from "./GoalsCard";
 import WeekGoalCard from "./weekGoalsCard";
@@ -39,13 +39,13 @@ export default function DashboardClient({
                 workdaysElapsed={kpi.business_days_elapsed}
                 workdaysRemaining={kpi.business_days_remaining}
               /> */}
-             <MonthGoalCard
+              <MonthGoalCard
                 monthly_meta={kpi.goal_meta}
                 monthly_realized={kpi.net_sales}
                 monthly_pct_achieved={kpi.pct_achieved}
               />
 
-              <DaysCard                 
+              <DaysCard
                 workdaysInMonth={kpi.business_days_month}
                 workdaysElapsed={kpi.business_days_elapsed}
                 workdaysRemaining={kpi.business_days_remaining} />
@@ -63,14 +63,14 @@ export default function DashboardClient({
                 weekly_missing_value={kpi.weekly_missing_value}
                 weekly_bonus={kpi.weekly_bonus}
               />
- 
+
 
 
             </div>
           )}
         </div>
 
-        <OpenBudgetsRow clients={openBudgetClients} />
+        <OpenBudgetsKanban clients={openBudgetClients} />
       </div>
     </div>
   );

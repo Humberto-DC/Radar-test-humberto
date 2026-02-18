@@ -1,0 +1,13 @@
+const { Pool } = require('pg');
+
+const radarPool = new Pool({
+    host: '172.16.0.32', port: 5432, database: 'migracao_oracle', user: 'radar_dev', password: '121279', ssl: false
+});
+
+async function checkReq() {
+    try {
+        const res = await radarPool.query(`SELECT * FROM public.requisicoes_devolucoes LIMIT 5`);
+        console.log(JSON.stringify(res.rows, null, 2));
+    } catch (e) { console.error(e); } finally { await radarPool.end(); }
+}
+checkReq();

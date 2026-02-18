@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { RankingSellerRow } from "@/app/(app)/ranking/page";
-import  StatGroup  from "./StatGroup"
+import StatGroup from "./StatGroup"
 import WalletStatGroup from "./WalletStatGroup";
 function Badge({
   children,
@@ -48,20 +48,20 @@ export default function SellerCard({
 
 
   // badges semana: 100% ✓ (100-109.999...) / 110% ✓ (>=110)
-const weekBadge = weeklyHit ? { text: "Semana ✓" } : null;
+  const weekBadge = weeklyHit ? { text: "Semana ✓" } : null;
 
-const monthBadge =
-  monthlyPct >= 110
-    ? { text: "Mês 110% ✓" }
-    : monthlyPct >= 100
-    ? { text: "Mês 100% ✓" }
-    : null;
+  const monthBadge =
+    monthlyPct >= 110
+      ? { text: "Mês 110% ✓" }
+      : monthlyPct >= 100
+        ? { text: "Mês 100% ✓" }
+        : null;
 
   return (
     <div className="group rounded-2xl bg-white sm:px-2 sm:py-1 shadow-sm hover:shadow-md transition-shadow border border-slate-100">
       {/* GRID que alinha com o header */}
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr_1fr_1fr] gap-6 items-stretch">
-        
+
         {/* VENDEDOR */}
         <div className="flex items-center gap-4 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-6">
           <div className="relative shrink-0">
@@ -99,7 +99,7 @@ const monthBadge =
         {/* SEMANA */}
         <div className="md:pl-0">
           <StatGroup
-            label="" 
+            label=""
             meta={row.weekly_meta}
             realized={row.weekly_realized}
             missing={row.weekly_missing_value}
@@ -112,7 +112,7 @@ const monthBadge =
         {/* MÊS */}
         <div className="md:relative md:pl-6 md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-12 md:before:w-px md:before:bg-slate-100">
           <StatGroup
-            label="Metas Mês" 
+            label="Metas Mês"
             meta={row.goal_meta}
             realized={row.net_sales}
             missing={monthlyMissing}
@@ -124,7 +124,7 @@ const monthBadge =
         {/* POSITIVAÇÃO */}
         <div className="md:relative md:pl-0 md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-12 md:before:w-px md:before:bg-slate-100">
           <WalletStatGroup
-            label="" 
+            label=""
             pct={row.wallet_positive_pct}
             total={row.wallet_total}
             positiveMonth={row.wallet_positive_month}

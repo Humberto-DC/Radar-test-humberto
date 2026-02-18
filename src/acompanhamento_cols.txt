@@ -1,0 +1,1 @@
+usuario_alteracao_santri_id, data_baixa, data_cadastro, data_hora_alteracao, data_retorno, empresa_id, valor_pedido, vendedor_fechamento_id, vendedor_id, concorrente_id, orcamento_fechamento_id, orcamento_id, usuario_alteracao, usuario_exclusao, estacao_alteracao, observacao, processo_alteracao, status

@@ -1,0 +1,34 @@
+const { Pool } = require('pg');
+
+const pool = new Pool({
+    host: '172.16.0.32', port: 5432, database: 'migracao_oracle',
+    user: 'postgres', password: 'senha123', ssl: false
+});
+
+async function run() {
+    try {
+        const res = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'clientes' AND table_schema = 'public'
+      ORDER BY column_name
+    `);
+        console.log("Colunas de public.clientes:");
+        console.log(res.rows.map(r => r.column_name).join('\n'));
+
+        const res2 = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'cadastros' AND table_schema = 'public'
+      ORDER BY column_name
+    `);
+        console.log("\nColunas de public.cadastros:");
+        console.log(res2.rows.map(r => r.column_name).join('\n'));
+
+    } catch (e) {
+        console.error(e);
+    } finally {
+        pool.end();
+    }
+}
+run();

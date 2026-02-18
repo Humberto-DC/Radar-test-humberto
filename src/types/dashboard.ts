@@ -14,9 +14,12 @@ export type Row = {
   cliente_ativo: string | null;
 
   // orçamento (1 linha por orçamento)
-  orcamento_id: number | string;
+  open_budget_id: number | string;
   validade_orcamento_min: Date | null;
   orcamento_status?: string | null;
+  orcamento_obs?: string | null;
+  orcamentos_abertos?: number;
+  valor_total?: number;
 
 
   // flag p/ UI
@@ -62,6 +65,9 @@ export type OpenBudgetCard = {
   open_budget_id: number | null;
   validade_orcamento_min: string | null;
   orcamento_status: string | null;
+  orcamento_obs: string | null;
+  orcamentos_abertos: number;
+  valor_total: number;
 
   contatos: ContatoRow[];
 
@@ -104,7 +110,7 @@ export type SellerKpiRow = {
   goal_meta: number;
   pct_achieved: number;
 
-  
+
   weekly_meta: number;          // meta_semanal
   weekly_realized: number;      // realizado
   weekly_pct_achieved: number;  // percentual_atingido
