@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# diagnostic scripts and text files
+/*.js
+/*.txt
+/*.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/postcss.config.mjs
+!/eslint.config.mjs
+!/next.config.ts
+!/vitest.config.ts
+!/jest.config.js
+!/cypress.config.ts
