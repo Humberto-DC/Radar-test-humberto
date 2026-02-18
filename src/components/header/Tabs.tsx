@@ -46,10 +46,7 @@ export default function HeaderTabs({ isAdmin }: { isAdmin: boolean }) {
             <LayoutGrid className="h-4 w-4" />
             Monitor ADM
           </Link>
-          <Link href="/goals" className={tabClass(pathname.startsWith("/goals"))}>
-            <Target className="h-4 w-4" />
-            Metas
-          </Link>
+
           <Link href="/financeiro" className={tabClass(pathname.startsWith("/financeiro"))}>
             <ShieldUser className="h-4 w-4" />
             Financeiro

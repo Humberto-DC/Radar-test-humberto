@@ -38,7 +38,6 @@ export default function FinanceiroClient() {
     });
 
     // Configurações de Premiação (Podem ser editadas em tela para simulação)
-    const [fixedReward, setFixedReward] = useState(200); // R$ 200,00 por semana batida
     const [percentReward, setPercentReward] = useState(0.0005); // 0,05%
 
     const fetchData = async (currentMonth: string) => {
@@ -94,8 +93,8 @@ export default function FinanceiroClient() {
                 let reward = 0;
                 if (week.is_met) {
                     weeksMetCount++;
-                    // Regra: Fixo + Percentual sobre o realizado
-                    reward = fixedReward + (week.realized * percentReward);
+                    // Regra: Percentual sobre o realizado
+                    reward = week.realized * percentReward;
                 }
                 totalCalculatedReward += reward;
                 return { ...week, calculatedReward: reward };
@@ -108,7 +107,7 @@ export default function FinanceiroClient() {
                 totalReward: totalCalculatedReward
             };
         });
-    }, [data, fixedReward, percentReward]);
+    }, [data, percentReward]);
 
     const exportToCSV = () => {
         const headers = ["Vendedor", ...reportWithCalculations[0]?.weeks.map((_, i) => `Semana ${i + 1}`), "Total Meta Batida", "Prêmio Total"];
@@ -174,21 +173,9 @@ export default function FinanceiroClient() {
                             <Filter size={18} />
                             <span className="text-xs font-bold uppercase tracking-widest">Regras de Cálculo</span>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black text-slate-400 uppercase">Prêmio Fixo (Semana)</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">R$</span>
-                                    <input
-                                        type="number"
-                                        value={fixedReward}
-                                        onChange={(e) => setFixedReward(Number(e.target.value))}
-                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px) font-black text-slate-400 uppercase">% sobre Venda</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase">% sobre Venda</label>
                                 <div className="relative">
                                     <input
                                         type="number"
